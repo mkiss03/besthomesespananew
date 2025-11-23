@@ -31,6 +31,16 @@ try {
         redirect('/properties.php');
     }
 
+    // Fetch property images
+    $stmt = $pdo->prepare("
+        SELECT id, filename, is_primary, sort_order
+        FROM property_images
+        WHERE property_id = ?
+        ORDER BY is_primary DESC, sort_order ASC
+    ");
+    $stmt->execute([$propertyId]);
+    $propertyImages = $stmt->fetchAll();
+
     // Page meta data
     $pageTitle = $property['meta_title'] ?? $property['title'];
     $pageDescription = $property['meta_description'] ?? strip_tags(substr($property['description'], 0, 160));
@@ -109,15 +119,138 @@ include __DIR__ . '/partials/header.php';
 }
 
 .property-gallery {
+    margin-bottom: var(--spacing-lg);
+}
+
+.gallery-hero {
+    position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.gallery-hero:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 .property-main-image {
     width: 100%;
     height: 500px;
     object-fit: cover;
+    display: block;
+}
+
+.gallery-thumbnails {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.gallery-thumbnail {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: var(--transition-fast);
+}
+
+.gallery-thumbnail:hover {
+    border-color: var(--primary-blue);
+}
+
+.gallery-thumbnail.active {
+    border-color: var(--accent-gold);
+}
+
+.gallery-thumbnail img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-lightbox.active {
+    display: flex;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.lightbox-image {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.lightbox-nav.prev {
+    left: 20px;
+}
+
+.lightbox-nav.next {
+    right: 20px;
 }
 
 .property-details-grid {
@@ -320,13 +453,125 @@ include __DIR__ . '/partials/header.php';
                 <!-- Gallery -->
                 <div class="property-gallery">
                     <?php
-                    $imageSrc = $property['main_image'] ?? '/assets/images/properties/default.jpg';
-                    if (strpos($imageSrc, 'http') === false && !file_exists(__DIR__ . $imageSrc)) {
-                        $imageSrc = 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200';
+                    // Determine main image to display
+                    $mainImageUrl = null;
+                    $galleryImages = [];
+
+                    if (!empty($propertyImages)) {
+                        // Use images from property_images table
+                        foreach ($propertyImages as $img) {
+                            $imgUrl = ASSETS_PATH . '/images/properties/' . $img['filename'];
+                            $galleryImages[] = [
+                                'url' => $imgUrl,
+                                'id' => $img['id']
+                            ];
+                        }
+                        $mainImageUrl = $galleryImages[0]['url'];
+                    } elseif (!empty($property['main_image'])) {
+                        // Fallback to main_image field
+                        $mainImageUrl = $property['main_image'];
+                        $galleryImages[] = ['url' => $mainImageUrl, 'id' => 0];
+                    } else {
+                        // Ultimate fallback
+                        $mainImageUrl = 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200';
+                        $galleryImages[] = ['url' => $mainImageUrl, 'id' => 0];
                     }
                     ?>
-                    <img src="<?= e($imageSrc) ?>" alt="<?= e($property['title']) ?>" class="property-main-image">
+
+                    <!-- Hero Image -->
+                    <div class="gallery-hero" onclick="openLightbox(0)">
+                        <img src="<?= e($mainImageUrl) ?>" alt="<?= e($property['title']) ?>" class="property-main-image" id="main-image">
+                    </div>
+
+                    <!-- Thumbnail Gallery -->
+                    <?php if (count($galleryImages) > 1): ?>
+                        <div class="gallery-thumbnails">
+                            <?php foreach ($galleryImages as $index => $img): ?>
+                                <div class="gallery-thumbnail <?= $index === 0 ? 'active' : '' ?>"
+                                     data-index="<?= $index ?>"
+                                     onclick="changeMainImage(<?= $index ?>)">
+                                    <img src="<?= e($img['url']) ?>" alt="<?= e($property['title']) ?> - Kép <?= $index + 1 ?>">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
+
+                <!-- Lightbox -->
+                <div class="gallery-lightbox" id="lightbox" onclick="closeLightbox(event)">
+                    <button class="lightbox-close" onclick="closeLightbox(event)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="lightbox-nav prev" onclick="navigateLightbox(-1); event.stopPropagation();">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="lightbox-content">
+                        <img src="" alt="" class="lightbox-image" id="lightbox-image">
+                    </div>
+                    <button class="lightbox-nav next" onclick="navigateLightbox(1); event.stopPropagation();">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <script>
+                // Gallery data
+                const galleryImages = <?= json_encode(array_map(function($img) { return $img['url']; }, $galleryImages)) ?>;
+                let currentImageIndex = 0;
+                let currentLightboxIndex = 0;
+
+                // Change main image
+                function changeMainImage(index) {
+                    currentImageIndex = index;
+                    document.getElementById('main-image').src = galleryImages[index];
+
+                    // Update active thumbnail
+                    document.querySelectorAll('.gallery-thumbnail').forEach((thumb, i) => {
+                        thumb.classList.toggle('active', i === index);
+                    });
+                }
+
+                // Open lightbox
+                function openLightbox(index) {
+                    currentLightboxIndex = index;
+                    document.getElementById('lightbox-image').src = galleryImages[index];
+                    document.getElementById('lightbox').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+
+                // Close lightbox
+                function closeLightbox(event) {
+                    if (event.target.id === 'lightbox' || event.target.closest('.lightbox-close')) {
+                        document.getElementById('lightbox').classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                }
+
+                // Navigate lightbox
+                function navigateLightbox(direction) {
+                    currentLightboxIndex += direction;
+                    if (currentLightboxIndex < 0) {
+                        currentLightboxIndex = galleryImages.length - 1;
+                    } else if (currentLightboxIndex >= galleryImages.length) {
+                        currentLightboxIndex = 0;
+                    }
+                    document.getElementById('lightbox-image').src = galleryImages[currentLightboxIndex];
+                }
+
+                // Keyboard navigation
+                document.addEventListener('keydown', function(e) {
+                    const lightbox = document.getElementById('lightbox');
+                    if (lightbox.classList.contains('active')) {
+                        if (e.key === 'Escape') {
+                            lightbox.classList.remove('active');
+                            document.body.style.overflow = '';
+                        } else if (e.key === 'ArrowLeft') {
+                            navigateLightbox(-1);
+                        } else if (e.key === 'ArrowRight') {
+                            navigateLightbox(1);
+                        }
+                    }
+                });
+                </script>
 
                 <!-- Details Grid -->
                 <div class="property-details-grid">

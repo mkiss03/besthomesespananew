@@ -452,6 +452,352 @@ include __DIR__ . '/partials/header.php';
         <?php endif; ?>
     </div>
 
+    <!-- Image Gallery -->
+    <?php if ($isEdit): ?>
+        <?php
+        // Load existing images
+        try {
+            $stmt = $pdo->prepare("
+                SELECT id, filename, is_primary, sort_order
+                FROM property_images
+                WHERE property_id = ?
+                ORDER BY sort_order ASC
+            ");
+            $stmt->execute([$propertyId]);
+            $propertyImages = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('Load images error: ' . $e->getMessage());
+            $propertyImages = [];
+        }
+        ?>
+
+        <div class="form-section" id="gallery-section">
+            <h3><i class="fas fa-images"></i> Képgaléria</h3>
+
+            <!-- Upload Area -->
+            <div class="upload-area">
+                <input type="file" id="image-upload" name="images[]" multiple accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('image-upload').click();">
+                    <i class="fas fa-upload"></i> Képek feltöltése
+                </button>
+                <small style="color: var(--text-medium); display: block; margin-top: 0.5rem;">
+                    Max 5MB képenként. Támogatott formátumok: JPG, PNG, WEBP
+                </small>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="gallery-grid" class="gallery-grid">
+                <?php if (empty($propertyImages)): ?>
+                    <p style="color: var(--text-medium); text-align: center; padding: var(--spacing-lg);">
+                        Még nincsenek feltöltött képek. Használja a fenti gombot képek feltöltéséhez.
+                    </p>
+                <?php else: ?>
+                    <?php foreach ($propertyImages as $img): ?>
+                        <div class="gallery-item" data-image-id="<?= $img['id'] ?>" draggable="true">
+                            <img src="<?= ASSETS_PATH ?>/images/properties/<?= e($img['filename']) ?>" alt="Property image">
+                            <div class="gallery-item-actions">
+                                <button type="button" class="btn-icon btn-danger" onclick="deleteImage(<?= $img['id'] ?>)" title="Törlés">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="gallery-item-drag">
+                                <i class="fas fa-grip-vertical"></i>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <!-- Upload Progress -->
+            <div id="upload-progress" style="display: none; margin-top: var(--spacing-md);">
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                </div>
+                <p id="upload-status" style="text-align: center; margin-top: 0.5rem; color: var(--text-medium);"></p>
+            </div>
+        </div>
+
+        <style>
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            cursor: move;
+            border: 2px solid #e0e0e0;
+            transition: var(--transition-fast);
+        }
+
+        .gallery-item:hover {
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow-md);
+        }
+
+        .gallery-item.dragging {
+            opacity: 0.5;
+        }
+
+        .gallery-item.drag-over {
+            border-color: var(--accent-gold);
+            border-style: dashed;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .gallery-item-drag {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            pointer-events: none;
+        }
+
+        .btn-icon {
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+        }
+
+        .btn-icon:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .btn-danger:hover {
+            background: #dc3545 !important;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: #e0e0e0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary-blue);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .upload-area {
+            padding: var(--spacing-md);
+            border: 2px dashed #e0e0e0;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+        </style>
+
+        <script>
+        // Image upload
+        document.getElementById('image-upload').addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('property_id', <?= $propertyId ?>);
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append('images[]', files[i]);
+            }
+
+            // Show progress
+            const progressDiv = document.getElementById('upload-progress');
+            const progressBar = document.getElementById('progress-bar-fill');
+            const statusText = document.getElementById('upload-status');
+            progressDiv.style.display = 'block';
+            statusText.textContent = 'Feltöltés...';
+
+            // Upload via AJAX
+            const xhr = new XMLHttpRequest();
+
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percent + '%';
+                }
+            });
+
+            xhr.addEventListener('load', function() {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        statusText.textContent = response.message;
+                        progressBar.style.width = '100%';
+
+                        // Reload page after short delay
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        alert('Hiba: ' + response.message);
+                        progressDiv.style.display = 'none';
+                    }
+                } else {
+                    alert('Feltöltési hiba történt.');
+                    progressDiv.style.display = 'none';
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                alert('Hálózati hiba történt.');
+                progressDiv.style.display = 'none';
+            });
+
+            xhr.open('POST', '/admin/api/property-image-upload.php');
+            xhr.send(formData);
+
+            // Reset file input
+            e.target.value = '';
+        });
+
+        // Delete image
+        function deleteImage(imageId) {
+            if (!confirm('Biztosan törölni szeretné ezt a képet?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image_id', imageId);
+
+            fetch('/admin/api/property-image-delete.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove item from DOM
+                    const item = document.querySelector('[data-image-id="' + imageId + '"]');
+                    if (item) {
+                        item.remove();
+                    }
+
+                    // Check if gallery is empty
+                    const gallery = document.getElementById('gallery-grid');
+                    if (gallery.children.length === 0) {
+                        gallery.innerHTML = '<p style="color: var(--text-medium); text-align: center; padding: var(--spacing-lg);">Még nincsenek feltöltött képek.</p>';
+                    }
+                } else {
+                    alert('Hiba: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Hálózati hiba történt.');
+                console.error(error);
+            });
+        }
+
+        // Drag and drop for reordering
+        const gallery = document.getElementById('gallery-grid');
+        let draggedItem = null;
+
+        gallery.addEventListener('dragstart', function(e) {
+            if (e.target.classList.contains('gallery-item')) {
+                draggedItem = e.target;
+                e.target.classList.add('dragging');
+            }
+        });
+
+        gallery.addEventListener('dragend', function(e) {
+            if (e.target.classList.contains('gallery-item')) {
+                e.target.classList.remove('dragging');
+            }
+        });
+
+        gallery.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(gallery, e.clientX);
+            const dragging = document.querySelector('.dragging');
+
+            if (afterElement == null) {
+                gallery.appendChild(dragging);
+            } else {
+                gallery.insertBefore(dragging, afterElement);
+            }
+        });
+
+        gallery.addEventListener('drop', function(e) {
+            e.preventDefault();
+
+            // Get new order
+            const items = gallery.querySelectorAll('.gallery-item');
+            const order = Array.from(items).map(item => item.getAttribute('data-image-id'));
+
+            // Send to server
+            fetch('/admin/api/property-image-reorder.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ order: order })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Hiba a sorrend mentésekor: ' + data.message);
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Reorder error:', error);
+            });
+        });
+
+        function getDragAfterElement(container, x) {
+            const draggableElements = [...container.querySelectorAll('.gallery-item:not(.dragging)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = x - box.left - box.width / 2;
+
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+        </script>
+    <?php endif; ?>
+
     <!-- Form Actions -->
     <div class="form-section">
         <div class="form-actions">
