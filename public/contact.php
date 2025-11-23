@@ -23,10 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
         try {
             $pdo = getPDO();
             $stmt = $pdo->prepare("
-                INSERT INTO inquiries (name, email, phone, message)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO contact_inquiries (name, email, phone, message, source_page)
+                VALUES (?, ?, ?, ?, ?)
             ");
-            $stmt->execute([$name, $email, $phone, $message]);
+            $stmt->execute([$name, $email, $phone, $message, 'contact']);
             $formSuccess = true;
 
             // Clear form data on success

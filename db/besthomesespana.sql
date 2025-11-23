@@ -300,3 +300,17 @@ INSERT INTO site_content (content_key, value) VALUES
 ('footer.contact_address', 'Alicante, Spanyolország'),
 ('footer.contact_phone_es', '+34 123 456 789'),
 ('footer.contact_phone_hu', '+36 20 123 4567');
+
+-- Contact inquiries table (separate from property inquiries)
+CREATE TABLE IF NOT EXISTS contact_inquiries (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(191) NOT NULL,
+    email VARCHAR(191) NOT NULL,
+    phone VARCHAR(50) DEFAULT NULL,
+    message TEXT NOT NULL,
+    source_page VARCHAR(191) DEFAULT NULL COMMENT 'Which page the inquiry came from',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read TINYINT(1) NOT NULL DEFAULT 0,
+    INDEX idx_created_at (created_at),
+    INDEX idx_is_read (is_read)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
