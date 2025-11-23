@@ -1,8 +1,6 @@
 -- Besthomesespana Database Schema
 -- Spanish Real Estate Website Database
-
-CREATE DATABASE IF NOT EXISTS besthomesespana CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE besthomesespana;
+-- IMPORTANT: Import this into the existing database via phpMyAdmin (c88384bhenew)
 
 -- Admin users table
 CREATE TABLE IF NOT EXISTS admins (
@@ -200,3 +198,105 @@ CREATE TABLE IF NOT EXISTS pages (
 INSERT INTO pages (slug, title, content) VALUES
 ('about', 'Rólunk', '<h2>Besthomesespana - Az Ön Megbízható Partnere Spanyolországban</h2><p>Több mint 10 éve segítünk magyar ügyfeleknek megtalálni álmaik ingatlanát a Costa Blanca és Costa del Sol régióban.</p>'),
 ('privacy', 'Adatkezelési Tájékoztató', '<h2>Adatkezelési Tájékoztató</h2><p>Az adatkezelés részletei...</p>');
+
+-- Site content table (for editable homepage content)
+CREATE TABLE IF NOT EXISTS site_content (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    content_key VARCHAR(191) NOT NULL UNIQUE,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_content_key (content_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert default content for homepage sections
+INSERT INTO site_content (content_key, value) VALUES
+-- Hero section
+('home.hero_title', 'Találd meg álomotthonod Costa Blancán'),
+('home.hero_subtitle', 'Prémium spanyol ingatlanok magyar ügyfeleknek. Villák, apartmanok, penthouse-ok a legszebb mediterrán helyszíneken.'),
+('home.hero_search_location_label', 'Helyszín'),
+('home.hero_search_type_label', 'Ingatlantípus'),
+('home.hero_search_status_label', 'Státusz'),
+('home.hero_search_price_label', 'Maximum ár'),
+('home.hero_search_bedrooms_label', 'Hálószobák'),
+('home.hero_search_button', 'Keresés'),
+
+-- Featured properties section
+('home.featured_title', 'Kiemelt Ingatlanok'),
+('home.featured_subtitle', 'Válogatott ajánlataink a legjobb spanyol ingatlanokból. Villák, apartmanok és penthouse-ok kivételes helyszíneken.'),
+('home.featured_filter_id', 'Azonosító'),
+('home.featured_filter_area', 'Alapterület'),
+('home.featured_filter_rooms', 'Szobaszám'),
+('home.featured_filter_condition', 'Állapot'),
+('home.featured_filter_pool', 'Medence'),
+('home.featured_filter_seaview', 'Tengerre néző'),
+('home.featured_load_more', 'További ingatlanok betöltése'),
+
+-- Costa Blanca section
+('home.costa_title', 'Fedezd fel Costa Blancát'),
+('home.costa_description_1', 'A Costa Blanca Spanyolország egyik legkedveltebb régiója, ahol az évszázados hagyományok találkoznak a modern mediterrán életstílussal. Kristálytiszta víz, aranyló homokos strandok és több mint 300 napsütéses nap évente.'),
+('home.costa_description_2', 'Ez a varázslatos régió ideális helyszín mind állandó lakhatásra, mind befektetési célokra. A kiváló infrastruktúra, nemzetközi iskolák, egészségügyi ellátás és a magyar közösség jelenléte miatt egyre többen választják új otthonuknak.'),
+('home.costa_description_3', 'Alicante, Benidorm, Torrevieja és Calpe egyaránt kínál egyedülálló lehetőségeket - a csendes családi környezettől a pezsgő városi élet élményéig.'),
+('home.costa_feature_1_icon', 'fa-sun'),
+('home.costa_feature_1_title', '320+ napsütéses nap'),
+('home.costa_feature_1_text', 'Évente átlagosan több mint 320 napon süt a nap'),
+('home.costa_feature_2_icon', 'fa-water'),
+('home.costa_feature_2_title', 'Kristálytiszta víz'),
+('home.costa_feature_2_text', 'Zászlós díjas strandok és tiszta mediterrán tenger'),
+('home.costa_feature_3_icon', 'fa-chart-line'),
+('home.costa_feature_3_title', 'Befektetési potenciál'),
+('home.costa_feature_3_text', 'Kiváló megtérülés és értéknövekedés'),
+('home.costa_feature_4_icon', 'fa-utensils'),
+('home.costa_feature_4_title', 'Mediterrán konyha'),
+('home.costa_feature_4_text', 'Friss tengeri herkentyűk és helyi specialitások'),
+
+-- Agent section
+('home.agent_title', 'Ismerd meg Balogh Esztert'),
+('home.agent_subtitle', 'Megbízható ingatlanszakértőd Spanyolországban'),
+('home.agent_image', '/assets/images/agent-eszter.jpg'),
+('home.agent_description_1', 'Több mint 15 éve élek Spanyolországban, és több mint 10 éve segítek magyar ügyfeleknek megtalálni álmaik otthonát a Costa Blanca és Costa del Sol régióban.'),
+('home.agent_description_2', 'Szakmai tapasztalatom és helyi kapcsolatrendszerem révén biztosítom, hogy minden ügyfelemnek a lehető legsimábban és legbiztonságosabban menjen a vásárlási folyamat. Magyar anyanyelvű szakemberként teljes körű támogatást nyújtok az első kereséstől az ügyintézés befejezéséig.'),
+('home.agent_description_3', 'Célom, hogy ne csak egy ingatlant találj, hanem egy új életérzést és otthont Spanyolországban.'),
+('home.agent_feature_1_icon', 'fa-certificate'),
+('home.agent_feature_1_title', 'Engedéllyel rendelkező szakember'),
+('home.agent_feature_1_text', 'Hivatalos spanyol ingatlanos engedély és biztosítás'),
+('home.agent_feature_2_icon', 'fa-language'),
+('home.agent_feature_2_title', 'Többnyelvű szolgáltatás'),
+('home.agent_feature_2_text', 'Magyar, spanyol, angol és német nyelven'),
+('home.agent_feature_3_icon', 'fa-clock'),
+('home.agent_feature_3_title', '24/7 elérhetőség'),
+('home.agent_feature_3_text', 'Mindig elérhető vagyok ügyfeleimnek'),
+('home.agent_feature_4_icon', 'fa-handshake'),
+('home.agent_feature_4_title', 'Személyes odafigyelés'),
+('home.agent_feature_4_text', 'Minden ügyféllel személyesen foglalkozom'),
+('home.agent_phone', '+34 123 456 789'),
+('home.agent_phone_label', 'Hívj most'),
+('home.agent_contact_label', 'Üzenet küldése'),
+
+-- Contact section
+('home.contact_title', 'Vedd fel velünk a kapcsolatot'),
+('home.contact_subtitle', 'Válaszolunk minden kérdésedre és segítünk megtalálni az ideális ingatlant'),
+('home.contact_form_name', 'Teljes név'),
+('home.contact_form_email', 'E-mail cím'),
+('home.contact_form_phone', 'Telefonszám'),
+('home.contact_form_message', 'Üzenet'),
+('home.contact_form_submit', 'Üzenet küldése'),
+('home.contact_office_title', 'Irodánk'),
+('home.contact_office_address', 'Calle Ejemplo 123, 03001 Alicante, Spanyolország'),
+('home.contact_office_phone', '+34 123 456 789'),
+('home.contact_office_phone_hu', '+36 20 123 4567'),
+('home.contact_office_email', 'info@besthomesespana.com'),
+('home.contact_office_hours_title', 'Nyitvatartás'),
+('home.contact_office_hours', 'Hétfő - Péntek: 9:00 - 18:00<br>Szombat: 10:00 - 14:00<br>Vasárnap: Zárva'),
+('home.contact_map_embed', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3131.234567890!2d-0.4906855!3d38.3452381!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDIwJzQyLjkiTiAwwrAyOSczMC41Ilc!5e0!3m2!1sen!2ses!4v1234567890'),
+
+-- Footer content
+('footer.company_description', 'Prémium spanyol ingatlanok magyar ügyfeleknek. Több mint 10 év tapasztalat a Costa Blanca és Costa del Sol régióban.'),
+('footer.services_title', 'Szolgáltatásaink'),
+('footer.services_1', 'Ingatlan keresés'),
+('footer.services_2', 'Jogi tanácsadás'),
+('footer.services_3', 'Finanszírozási segítség'),
+('footer.services_4', 'Utólagos ügyintézés'),
+('footer.legal_title', 'Jogi információk'),
+('footer.contact_address', 'Alicante, Spanyolország'),
+('footer.contact_phone_es', '+34 123 456 789'),
+('footer.contact_phone_hu', '+36 20 123 4567');

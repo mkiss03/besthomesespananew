@@ -6,8 +6,8 @@
 
 // Database configuration
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'c88384bhe25');
-define('DB_USER', 'c88384eszter25');
+define('DB_NAME', 'c88384bhenew');
+define('DB_USER', 'c88384bhe');
 define('DB_PASS', 'Eszter2009');
 define('DB_CHARSET', 'utf8mb4');
 
@@ -159,4 +159,63 @@ function generateSlug(string $title): string {
     $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
     $slug = preg_replace('/-+/', '-', $slug);
     return trim($slug, '-');
+}
+
+/**
+ * Get content from site_content table by key
+ * Uses in-memory cache to avoid multiple DB queries for the same key
+ *
+ * @param string $key Content key (e.g., 'home.hero_title')
+ * @param string $default Default value if key not found
+ * @return string Content value or default
+ */
+function get_content(string $key, string $default = ''): string {
+    static $cache = [];
+
+    // Return from cache if already loaded
+    if (isset($cache[$key])) {
+        return $cache[$key];
+    }
+
+    try {
+        $pdo = getPDO();
+        $stmt = $pdo->prepare("SELECT value FROM site_content WHERE content_key = ? LIMIT 1");
+        $stmt->execute([$key]);
+        $result = $stmt->fetch();
+
+        if ($result) {
+            $cache[$key] = $result['value'];
+            return $result['value'];
+        } else {
+            $cache[$key] = $default;
+            return $default;
+        }
+    } catch (PDOException $e) {
+        error_log('get_content error for key "' . $key . '": ' . $e->getMessage());
+        return $default;
+    }
+}
+
+/**
+ * Update or insert content in site_content table
+ * Will be used later by admin panel to update homepage content
+ *
+ * @param string $key Content key
+ * @param string $value Content value
+ * @return bool Success status
+ */
+function update_content(string $key, string $value): bool {
+    try {
+        $pdo = getPDO();
+        $stmt = $pdo->prepare("
+            INSERT INTO site_content (content_key, value)
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE value = ?, updated_at = CURRENT_TIMESTAMP
+        ");
+        $stmt->execute([$key, $value, $value]);
+        return true;
+    } catch (PDOException $e) {
+        error_log('update_content error for key "' . $key . '": ' . $e->getMessage());
+        return false;
+    }
 }
