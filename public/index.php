@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 
+// Start session for flash messages
+startSession();
+
 // Page meta data
 $pageTitle = 'Főoldal';
 $pageDescription = get_content('home.hero_subtitle', 'Prémium spanyol ingatlanok magyar ügyfeleknek. Villák, apartmanok, penthouse-ok a Costa Blanca és Costa del Sol régióban.');
@@ -352,7 +355,7 @@ include __DIR__ . '/partials/header.php';
 </section>
 
 <!-- Contact Section -->
-<section class="section section-alt">
+<section class="section section-alt" id="kapcsolat">
     <div class="container">
         <div class="section-header text-center">
             <h2><?= htmlspecialchars(get_content('home.contact_title', 'Vedd fel velünk a kapcsolatot')) ?></h2>
@@ -364,26 +367,47 @@ include __DIR__ . '/partials/header.php';
         <div class="contact-layout">
             <!-- Contact Form -->
             <div class="contact-form-wrapper">
+                <?php if (!empty($_SESSION['contact_success'])): ?>
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <?= e($_SESSION['contact_success']) ?>
+                    </div>
+                    <?php unset($_SESSION['contact_success']); ?>
+                <?php endif; ?>
+
+                <?php if (!empty($_SESSION['contact_errors'])): ?>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <ul style="margin: 0; padding-left: 1.5rem;">
+                            <?php foreach ($_SESSION['contact_errors'] as $error): ?>
+                                <li><?= e($error) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php unset($_SESSION['contact_errors']); ?>
+                <?php endif; ?>
+
                 <form action="/contact.php" method="POST" class="contact-form">
                     <div class="form-group">
                         <label for="name"><?= htmlspecialchars(get_content('home.contact_form_name', 'Teljes név')) ?></label>
-                        <input type="text" id="name" name="name" class="form-control" required>
+                        <input type="text" id="name" name="name" class="form-control" value="<?= e($_SESSION['contact_old']['name'] ?? '') ?>" required>
                     </div>
 
                     <div class="form-group">
                         <label for="email"><?= htmlspecialchars(get_content('home.contact_form_email', 'E-mail cím')) ?></label>
-                        <input type="email" id="email" name="email" class="form-control" required>
+                        <input type="email" id="email" name="email" class="form-control" value="<?= e($_SESSION['contact_old']['email'] ?? '') ?>" required>
                     </div>
 
                     <div class="form-group">
                         <label for="phone"><?= htmlspecialchars(get_content('home.contact_form_phone', 'Telefonszám')) ?></label>
-                        <input type="tel" id="phone" name="phone" class="form-control">
+                        <input type="tel" id="phone" name="phone" class="form-control" value="<?= e($_SESSION['contact_old']['phone'] ?? '') ?>">
                     </div>
 
                     <div class="form-group">
                         <label for="message"><?= htmlspecialchars(get_content('home.contact_form_message', 'Üzenet')) ?></label>
-                        <textarea id="message" name="message" class="form-control" rows="5" required></textarea>
+                        <textarea id="message" name="message" class="form-control" rows="5" required><?= e($_SESSION['contact_old']['message'] ?? '') ?></textarea>
                     </div>
+                    <?php unset($_SESSION['contact_old']); ?>
 
                     <button type="submit" class="btn btn-primary btn-block">
                         <i class="fas fa-paper-plane"></i> <?= htmlspecialchars(get_content('home.contact_form_submit', 'Üzenet küldése')) ?>
