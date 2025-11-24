@@ -135,5 +135,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Properties AJAX Search -->
 <script src="/assets/js/properties.js"></script>
 
+<!-- Hero Slider -->
+<script src="/assets/js/hero-slider.js"></script>
+
 </body>
 </html>

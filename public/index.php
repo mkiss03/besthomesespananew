@@ -110,7 +110,13 @@ include __DIR__ . '/partials/header.php';
 
 <!-- Hero Section -->
 <section class="hero">
-    <div class="hero-background" style="background: linear-gradient(135deg, rgba(0, 71, 171, 0.85), rgba(0, 120, 215, 0.75)), url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920') center/cover;"></div>
+    <!-- Hero Slider Background -->
+    <div class="hero-slider">
+        <div class="hero-slide active" style="background-image: url('/assets/images/hero/main1.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('/assets/images/hero/main2.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('/assets/images/hero/main3.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('/assets/images/hero/main4.jpg');"></div>
+    </div>
     <div class="hero-overlay"></div>
 
     <div class="hero-content">
@@ -286,16 +292,16 @@ include __DIR__ . '/partials/header.php';
             <div class="image-grid-column">
                 <div class="image-grid">
                     <div class="grid-image">
-                        <img src="https://images.unsplash.com/photo-1580837119756-563d608dd119?w=600" alt="Costa Blanca beach" loading="lazy">
+                        <img src="/assets/images/locations/main5.jpg" alt="Costa Blanca beach" loading="lazy">
                     </div>
                     <div class="grid-image">
-                        <img src="https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600" alt="Alicante city" loading="lazy">
+                        <img src="/assets/images/locations/main6.jpg" alt="Alicante city" loading="lazy">
                     </div>
                     <div class="grid-image">
-                        <img src="https://images.unsplash.com/photo-1571757767119-68b8dbed8c97?w=600" alt="Spanish villa" loading="lazy">
+                        <img src="/assets/images/locations/main7.jpg" alt="Spanish villa" loading="lazy">
                     </div>
                     <div class="grid-image">
-                        <img src="https://images.unsplash.com/photo-1551524164-687a55dd1126?w=600" alt="Mediterranean lifestyle" loading="lazy">
+                        <img src="/assets/images/locations/main1.jpg" alt="Mediterranean lifestyle" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -309,7 +315,7 @@ include __DIR__ . '/partials/header.php';
         <div class="agent-section">
             <!-- Agent Photo -->
             <div class="agent-photo">
-                <img src="<?= e(get_content('home.agent_image', '/assets/images/agent-eszter.jpg')) ?>" alt="<?= e(get_content('home.agent_title', 'Balogh Eszter')) ?>">
+                <img src="<?= e(get_content('home.agent_image', '/assets/images/team/eszter-main.jpg')) ?>" alt="<?= e(get_content('home.agent_title', 'Balogh Eszter')) ?>">
             </div>
 
             <!-- Agent Content -->
