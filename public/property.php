@@ -1,18 +1,40 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 
+// SUPER DEBUG MODE - Show everything before any redirect
+echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>DEBUG</title></head><body style='padding:40px;font-family:Arial;background:#f0f0f0;'>";
+echo "<div style='background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);'>";
+echo "<h1 style='color:#e74c3c;'>🔍 PROPERTY DEBUG MODE</h1>";
+echo "<hr>";
+echo "<h2>1. URL Information:</h2>";
+echo "<p><strong>Teljes URL:</strong> <code>" . ($_SERVER['REQUEST_URI'] ?? 'N/A') . "</code></p>";
+echo "<p><strong>GET paraméterek:</strong></p><pre style='background:#f8f8f8;padding:15px;border-radius:5px;'>" . print_r($_GET, true) . "</pre>";
+
 // Get property ID from URL
 $propertyId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// DEBUG: Log the property ID
-error_log("Property.php loaded with ID: " . $propertyId . " | GET params: " . print_r($_GET, true));
+echo "<h2>2. Property ID Ellenőrzés:</h2>";
+echo "<p><strong>Talált Property ID:</strong> <span style='font-size:24px;color:" . ($propertyId ? "green" : "red") . ";'>" . ($propertyId ?: 'NINCS') . "</span></p>";
 
-// TEMPORARY DEBUG: Show what's happening
 if (!$propertyId) {
-    error_log("No property ID provided, redirecting to /properties");
-    die("DEBUG: No property ID provided. GET params: " . print_r($_GET, true));
-    redirect('/properties');
+    echo "<div style='background:#ffe6e6;padding:20px;border-left:4px solid #e74c3c;margin:20px 0;'>";
+    echo "<h3 style='color:#e74c3c;margin-top:0;'>❌ HIBA: Nincs property ID a URL-ben!</h3>";
+    echo "<p><strong>Ok:</strong> Az ingatlan linkben nincs ?id=X paraméter</p>";
+    echo "<p><strong>Példa helyes link:</strong> <code>/property?id=1</code></p>";
+    echo "</div>";
+    echo "<p><a href='/' style='background:#3498db;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;'>← Vissza a főoldalra</a></p>";
+    echo "</div></body></html>";
+    exit;
 }
+
+echo "<div style='background:#e6ffe6;padding:20px;border-left:4px solid #27ae60;margin:20px 0;'>";
+echo "<h3 style='color:#27ae60;margin-top:0;'>✅ Property ID rendben!</h3>";
+echo "<p>Folytatás az ingatlan adatainak betöltésével...</p>";
+echo "</div>";
+echo "</div></body></html>";
+
+// Comment out the rest temporarily to see if we get this far
+exit;
 
 // Fetch property details
 try {
