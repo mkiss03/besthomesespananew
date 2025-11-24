@@ -329,6 +329,9 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                 <a href="/admin/inquiries.php" class="menu-item <?= $currentPage === 'inquiries' ? 'active' : '' ?>">
                     <i class="fas fa-envelope"></i> Érdeklődések
                 </a>
+                <a href="/admin/content.php" class="menu-item <?= $currentPage === 'content' ? 'active' : '' ?>">
+                    <i class="fas fa-edit"></i> Tartalom
+                </a>
                 <a href="/" target="_blank" class="menu-item">
                     <i class="fas fa-external-link-alt"></i> Weboldal megtekintése
                 </a>

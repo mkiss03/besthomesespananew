@@ -1,0 +1,31 @@
+# Besthomesespana - URL Rewrite Rules
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Redirect /property to property.php
+    RewriteRule ^property$ property.php [L,QSA]
+
+    # Redirect /properties to properties.php
+    RewriteRule ^properties$ properties.php [L,QSA]
+
+    # Redirect /contact to contact.php
+    RewriteRule ^contact$ contact.php [L,QSA]
+
+    # Redirect /about to about.php (if exists)
+    RewriteRule ^about$ about.php [L,QSA]
+</IfModule>
+
+# Security: Disable directory browsing
+Options -Indexes
+
+# Set default index files
+DirectoryIndex index.php index.html
+
+# PHP Settings
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
