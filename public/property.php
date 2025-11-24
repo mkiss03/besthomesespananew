@@ -4,7 +4,11 @@ require_once __DIR__ . '/../config/config.php';
 // Get property ID from URL
 $propertyId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
+// DEBUG: Log the property ID
+error_log("Property.php loaded with ID: " . $propertyId . " | GET params: " . print_r($_GET, true));
+
 if (!$propertyId) {
+    error_log("No property ID provided, redirecting to properties.php");
     redirect('properties.php');
 }
 
@@ -28,8 +32,11 @@ try {
     $property = $stmt->fetch();
 
     if (!$property) {
+        error_log("Property not found for ID: " . $propertyId . ", redirecting to properties.php");
         redirect('properties.php');
     }
+
+    error_log("Property found: " . $property['title'] . " (ID: " . $propertyId . ")");
 
     // Fetch property images
     $stmt = $pdo->prepare("

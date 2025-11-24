@@ -234,7 +234,7 @@ include __DIR__ . '/partials/header.php';
         <?php else: ?>
             <div class="properties-grid">
                 <?php foreach ($properties as $property): ?>
-                    <a href="property.php?id=<?= $property['id'] ?>" class="property-card">
+                    <a href="property.php?id=<?= (int)$property['id'] ?>" class="property-card" data-property-id="<?= (int)$property['id'] ?>" style="display: block; text-decoration: none;">
                         <div class="property-card-image">
                             <?php
                             $imageSrc = $property['main_image'] ?? '/assets/images/properties/default.jpg';
