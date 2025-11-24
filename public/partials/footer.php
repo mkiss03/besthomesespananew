@@ -132,5 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- Properties AJAX Search -->
+<script src="/assets/js/properties.js"></script>
+
 </body>
 </html>

@@ -44,7 +44,7 @@ $currentPath = getCurrentPath();
 
         <ul class="navbar-menu" id="navbar-menu">
             <li><a href="/index.php" class="<?= $currentPath === '/index.php' || $currentPath === '/' ? 'active' : '' ?>">Főoldal</a></li>
-            <li><a href="/properties.php" class="<?= strpos($currentPath, '/properties') === 0 ? 'active' : '' ?>">Ingatlanok</a></li>
+            <li><a href="/#ingatlanok-section" class="<?= strpos($currentPath, '/properties') === 0 ? 'active' : '' ?>">Ingatlanok</a></li>
             <li><a href="/about.php" class="<?= $currentPath === '/about.php' ? 'active' : '' ?>">Rólunk</a></li>
             <li><a href="/#kapcsolat">Kapcsolat</a></li>
         </ul>

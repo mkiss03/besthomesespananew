@@ -120,7 +120,7 @@ include __DIR__ . '/partials/header.php';
         </p>
 
         <!-- Search Form -->
-        <form action="/properties" method="GET" class="search-form">
+        <form id="hero-search-form" action="/properties" method="GET" class="search-form">
             <div class="form-group">
                 <label for="location"><?= htmlspecialchars(get_content('home.hero_search_location_label', 'Helyszín')) ?></label>
                 <select name="location" id="location" class="form-control">
@@ -203,173 +203,27 @@ include __DIR__ . '/partials/header.php';
     </div>
 </section>
 
-<!-- Featured Properties Section -->
-<section class="section" id="featured">
+<!-- Properties Section with AJAX Filtering -->
+<section class="section" id="ingatlanok-section">
     <div class="container">
         <div class="section-header text-center">
-            <h2><?= htmlspecialchars(get_content('home.featured_title', 'Kiemelt Ingatlanok')) ?></h2>
+            <h2>Ingatlanjaink</h2>
             <p class="section-subtitle">
-                <?= htmlspecialchars(get_content('home.featured_subtitle', 'Válogatott ajánlataink a legjobb spanyol ingatlanokból')) ?>
+                Találja meg álmai otthonát Spanyolországban
             </p>
         </div>
 
-        <!-- Results count for filtered searches -->
-        <?php if ($hasFilters): ?>
-            <div class="results-info" style="text-align: center; margin-bottom: 1.5rem; font-size: 1.125rem; color: var(--text-medium);">
-                <strong><?= $totalResults ?></strong> találat
-            </div>
-        <?php endif; ?>
+        <!-- Detailed Filters (AJAX, no submit button) -->
+        <?php include __DIR__ . '/partials/property-filters.php'; ?>
 
-        <!-- Detailed Filter Row -->
-        <form method="GET" action="index.php#featured" class="filter-bar">
-            <div class="filter-group">
-                <label for="property_id"><?= htmlspecialchars(get_content('home.featured_filter_id', 'Azonosító')) ?></label>
-                <input type="text" id="property_id" name="property_id" class="filter-input" placeholder="ID..." value="<?= e($filterPropertyId) ?>">
-            </div>
-
-            <div class="filter-group">
-                <label for="filter_location">Helyszín</label>
-                <select id="filter_location" name="location" class="filter-input">
-                    <option value="">Összes</option>
-                    <?php
-                    $allowedCities = ['Benidorm', 'Alicante', 'Torrevieja', 'Calpe'];
-                    foreach ($allowedCities as $city):
-                        $selected = ($city === $filterLocation) ? 'selected' : '';
-                    ?>
-                        <option value="<?= e($city) ?>" <?= $selected ?>><?= e($city) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="filter_type">Típus</label>
-                <select id="filter_type" name="type" class="filter-input">
-                    <option value="">Összes</option>
-                    <?php
-                    try {
-                        $typeStmt = $pdo->query("SELECT id, name_hu FROM property_types ORDER BY name_hu");
-                        while ($type = $typeStmt->fetch()):
-                            $selected = ($type['id'] == $filterType) ? 'selected' : '';
-                        ?>
-                            <option value="<?= e($type['id']) ?>" <?= $selected ?>><?= e($type['name_hu']) ?></option>
-                        <?php endwhile;
-                    } catch (PDOException $e) {
-                        error_log($e->getMessage());
-                    }
-                    ?>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="filter_price_min">Min. ár (€)</label>
-                <input type="number" id="filter_price_min" name="price_min" class="filter-input" placeholder="0" value="<?= e($filterPriceMin) ?>">
-            </div>
-
-            <div class="filter-group">
-                <label for="filter_price_max">Max. ár (€)</label>
-                <input type="number" id="filter_price_max" name="price_max" class="filter-input" placeholder="0" value="<?= e($filterPriceMax) ?>">
-            </div>
-
-            <div class="filter-group">
-                <label for="area_min"><?= htmlspecialchars(get_content('home.featured_filter_area', 'Min. alapterület (m²)')) ?></label>
-                <input type="number" id="area_min" name="area_min" class="filter-input" placeholder="0" value="<?= e($filterAreaMin) ?>">
-            </div>
-
-            <div class="filter-group">
-                <label for="filter_bedrooms"><?= htmlspecialchars(get_content('home.featured_filter_rooms', 'Min. szobaszám')) ?></label>
-                <input type="number" id="filter_bedrooms" name="bedrooms" class="filter-input" placeholder="0" value="<?= e($filterBedroomsMin) ?>">
-            </div>
-
-            <div class="filter-group">
-                <label>
-                    <input type="checkbox" name="has_pool" class="filter-checkbox" <?= $filterHasPool ? 'checked' : '' ?>>
-                    <?= htmlspecialchars(get_content('home.featured_filter_pool', 'Medence')) ?>
-                </label>
-            </div>
-
-            <div class="filter-group">
-                <label>
-                    <input type="checkbox" name="has_sea_view" class="filter-checkbox" <?= $filterHasSeaView ? 'checked' : '' ?>>
-                    <?= htmlspecialchars(get_content('home.featured_filter_seaview', 'Tengerre néző')) ?>
-                </label>
-            </div>
-
-            <div class="filter-group">
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
-                    <i class="fas fa-search"></i> Szűrés
-                </button>
-            </div>
-
-            <?php if ($hasFilters): ?>
-                <div class="filter-group">
-                    <a href="index.php#featured" class="btn btn-outline" style="width: 100%; margin-top: 1.5rem; display: inline-block; text-align: center;">
-                        <i class="fas fa-times"></i> Törlés
-                    </a>
-                </div>
-            <?php endif; ?>
-        </form>
-
-        <?php if (empty($featuredProperties)): ?>
-            <p class="text-center">Jelenleg nincsenek kiemelt ingatlanok.</p>
-        <?php else: ?>
-            <div class="properties-grid">
-                <?php foreach ($featuredProperties as $property): ?>
-                    <a href="/property?id=<?= (int)$property['id'] ?>" class="property-card" data-property-id="<?= (int)$property['id'] ?>" style="display: block; text-decoration: none;">
-                        <div class="property-card-image">
-                            <?php
-                            $imageSrc = $property['main_image'] ?? '/assets/images/properties/default.jpg';
-                            if (strpos($imageSrc, 'http') === false && !file_exists(__DIR__ . $imageSrc)) {
-                                $imageSrc = 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800';
-                            }
-                            ?>
-                            <img src="<?= e($imageSrc) ?>" alt="<?= e($property['title']) ?>" loading="lazy">
-                            <?php if ($property['is_featured']): ?>
-                                <span class="property-badge">Kiemelt</span>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="property-card-content">
-                            <div class="property-price">
-                                <?= formatPrice($property['price'], $property['currency']) ?>
-                            </div>
-
-                            <h3 class="property-title"><?= e($property['title']) ?></h3>
-
-                            <p class="property-location">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <?= e($property['city']) ?>, <?= e($property['region']) ?>
-                            </p>
-
-                            <div class="property-features">
-                                <span class="property-feature">
-                                    <i class="fas fa-bed property-feature-icon"></i>
-                                    <?= $property['bedrooms'] ?> háló
-                                </span>
-                                <span class="property-feature">
-                                    <i class="fas fa-bath property-feature-icon"></i>
-                                    <?= $property['bathrooms'] ?> fürdő
-                                </span>
-                                <span class="property-feature">
-                                    <i class="fas fa-ruler-combined property-feature-icon"></i>
-                                    <?= formatArea($property['area_sqm']) ?>
-                                </span>
-                                <?php if ($property['has_pool']): ?>
-                                    <span class="property-feature">
-                                        <i class="fas fa-swimming-pool property-feature-icon"></i>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-
-            <div class="text-center mt-5">
-                <a href="/properties" class="btn btn-secondary btn-lg">
-                    <?= htmlspecialchars(get_content('home.featured_load_more', 'Összes ingatlan megtekintése')) ?> <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-        <?php endif; ?>
+        <!-- Property Results Container (AJAX updates this) -->
+        <div id="property-results">
+            <?php
+            // Initial load - show all active properties
+            $properties = $featuredProperties; // Or fetch all properties
+            include __DIR__ . '/partials/property-list.php';
+            ?>
+        </div>
     </div>
 </section>
 
