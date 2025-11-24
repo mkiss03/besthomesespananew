@@ -120,7 +120,7 @@ include __DIR__ . '/partials/header.php';
         </p>
 
         <!-- Search Form -->
-        <form action="/properties.php" method="GET" class="search-form">
+        <form action="properties.php" method="GET" class="search-form">
             <div class="form-group">
                 <label for="location"><?= htmlspecialchars(get_content('home.hero_search_location_label', 'Helyszín')) ?></label>
                 <select name="location" id="location" class="form-control">
@@ -221,7 +221,7 @@ include __DIR__ . '/partials/header.php';
         <?php endif; ?>
 
         <!-- Detailed Filter Row -->
-        <form method="GET" action="/index.php#featured" class="filter-bar">
+        <form method="GET" action="index.php#featured" class="filter-bar">
             <div class="filter-group">
                 <label for="property_id"><?= htmlspecialchars(get_content('home.featured_filter_id', 'Azonosító')) ?></label>
                 <input type="text" id="property_id" name="property_id" class="filter-input" placeholder="ID..." value="<?= e($filterPropertyId) ?>">
@@ -302,7 +302,7 @@ include __DIR__ . '/partials/header.php';
 
             <?php if ($hasFilters): ?>
                 <div class="filter-group">
-                    <a href="/index.php#featured" class="btn btn-outline" style="width: 100%; margin-top: 1.5rem; display: inline-block; text-align: center;">
+                    <a href="index.php#featured" class="btn btn-outline" style="width: 100%; margin-top: 1.5rem; display: inline-block; text-align: center;">
                         <i class="fas fa-times"></i> Törlés
                     </a>
                 </div>
@@ -314,7 +314,7 @@ include __DIR__ . '/partials/header.php';
         <?php else: ?>
             <div class="properties-grid">
                 <?php foreach ($featuredProperties as $property): ?>
-                    <a href="/property.php?id=<?= $property['id'] ?>" class="property-card">
+                    <a href="property.php?id=<?= $property['id'] ?>" class="property-card">
                         <div class="property-card-image">
                             <?php
                             $imageSrc = $property['main_image'] ?? '/assets/images/properties/default.jpg';
@@ -365,7 +365,7 @@ include __DIR__ . '/partials/header.php';
             </div>
 
             <div class="text-center mt-5">
-                <a href="/properties.php" class="btn btn-secondary btn-lg">
+                <a href="properties.php" class="btn btn-secondary btn-lg">
                     <?= htmlspecialchars(get_content('home.featured_load_more', 'Összes ingatlan megtekintése')) ?> <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
