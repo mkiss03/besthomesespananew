@@ -4,21 +4,7 @@ requireAdmin();
 
 $pageTitle = 'Érdeklődések';
 
-// Handle mark as read for contact inquiries
-if (isset($_GET['mark_read']) && is_numeric($_GET['mark_read'])) {
-    $inquiryId = (int)$_GET['mark_read'];
-    try {
-        $pdo = getPDO();
-        $stmt = $pdo->prepare("UPDATE contact_inquiries SET is_read = 1 WHERE id = ?");
-        $stmt->execute([$inquiryId]);
-    } catch (PDOException $e) {
-        error_log('Mark read error: ' . $e->getMessage());
-    }
-    header('Location: /admin/inquiries.php#contact-inquiries');
-    exit;
-}
-
-// Get property inquiries
+// Get property inquiries (where property_id IS NOT NULL)
 try {
     $pdo = getPDO();
 
@@ -29,6 +15,7 @@ try {
             p.id as property_id
         FROM inquiries i
         LEFT JOIN properties p ON i.property_id = p.id
+        WHERE i.property_id IS NOT NULL
         ORDER BY
             CASE i.status
                 WHEN 'new' THEN 1
@@ -39,24 +26,26 @@ try {
     ");
     $inquiries = $stmt->fetchAll();
 
-    // Count by status
+    // Count by status (property inquiries only)
     $statusCounts = $pdo->query("
         SELECT status, COUNT(*) as count
         FROM inquiries
+        WHERE property_id IS NOT NULL
         GROUP BY status
     ")->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    // Get contact inquiries
+    // Get contact inquiries (where property_id IS NULL)
     $stmt = $pdo->query("
         SELECT *
-        FROM contact_inquiries
+        FROM inquiries
+        WHERE property_id IS NULL
         ORDER BY created_at DESC
         LIMIT 100
     ");
     $contactInquiries = $stmt->fetchAll();
 
-    // Count unread contact inquiries
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM contact_inquiries WHERE is_read = 0");
+    // Count new contact inquiries
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM inquiries WHERE property_id IS NULL AND status = 'new'");
     $unreadContactCount = $stmt->fetch()['count'];
 
 } catch (PDOException $e) {
@@ -386,7 +375,7 @@ include __DIR__ . '/partials/header.php';
                     </thead>
                     <tbody>
                         <?php foreach ($contactInquiries as $inquiry): ?>
-                            <tr class="<?= $inquiry['is_read'] ? '' : 'unread' ?>">
+                            <tr class="<?= $inquiry['status'] !== 'new' ? '' : 'unread' ?>">
                                 <td style="white-space: nowrap;">
                                     <?= date('Y-m-d H:i', strtotime($inquiry['created_at'])) ?>
                                 </td>
@@ -399,10 +388,12 @@ include __DIR__ . '/partials/header.php';
                                     </div>
                                 </td>
                                 <td>
-                                    <?php if ($inquiry['is_read']): ?>
-                                        <span class="badge badge-read">Olvasott</span>
-                                    <?php else: ?>
+                                    <?php if ($inquiry['status'] === 'new'): ?>
                                         <span class="badge badge-new">Új</span>
+                                    <?php elseif ($inquiry['status'] === 'contacted'): ?>
+                                        <span class="badge badge-contacted">Kapcsolatba lépve</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-closed">Lezárva</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -498,12 +489,6 @@ function viewContactDetails(id) {
             </div>
         </div>
         ` : ''}
-        ${inquiry.source_page ? `
-        <div class="detail-row">
-            <div class="detail-label">Oldal:</div>
-            <div class="detail-value">${escapeHtml(inquiry.source_page)}</div>
-        </div>
-        ` : ''}
         <div class="detail-row">
             <div class="detail-label">Üzenet:</div>
             <div class="message-content">${escapeHtml(inquiry.message).replace(/\n/g, '<br>')}</div>
@@ -511,20 +496,24 @@ function viewContactDetails(id) {
         <div class="detail-row">
             <div class="detail-label">Státusz:</div>
             <div class="detail-value">
-                ${inquiry.is_read ? '<span class="badge badge-read">Olvasott</span>' : '<span class="badge badge-new">Új</span>'}
+                ${inquiry.status === 'new' ? '<span class="badge badge-new">Új</span>' :
+                  inquiry.status === 'contacted' ? '<span class="badge badge-contacted">Kapcsolatba lépve</span>' :
+                  '<span class="badge badge-closed">Lezárva</span>'}
+            </div>
+        </div>
+        <div class="detail-row" style="margin-top: var(--spacing-md);">
+            <div class="detail-label">Státusz frissítése:</div>
+            <div class="detail-value">
+                <select onchange="updateInquiryStatus(${id}, this.value)" style="padding: 0.5rem; border-radius: var(--radius-md); border: 2px solid #e0e0e0;">
+                    <option value="new" ${inquiry.status === 'new' ? 'selected' : ''}>Új</option>
+                    <option value="contacted" ${inquiry.status === 'contacted' ? 'selected' : ''}>Kapcsolatba lépve</option>
+                    <option value="closed" ${inquiry.status === 'closed' ? 'selected' : ''}>Lezárva</option>
+                </select>
             </div>
         </div>
     `;
 
     document.getElementById('contactModal').classList.add('active');
-
-    // Mark as read
-    if (!inquiry.is_read) {
-        fetch(`/admin/inquiries.php?mark_read=${id}`)
-            .then(() => {
-                inquiry.is_read = 1;
-            });
-    }
 }
 
 function closeContactModal() {

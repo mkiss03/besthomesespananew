@@ -53,10 +53,10 @@ if (!empty($errors)) {
 try {
     $pdo = getPDO();
     $stmt = $pdo->prepare("
-        INSERT INTO contact_inquiries (name, email, phone, message, source_page)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO inquiries (property_id, name, email, phone, message, status)
+        VALUES (NULL, ?, ?, ?, ?, 'new')
     ");
-    $stmt->execute([$name, $email, $phone, $message, 'home']);
+    $stmt->execute([$name, $email, $phone, $message]);
 
     // Success - set success message
     $_SESSION['contact_success'] = 'Köszönjük megkeresését! Hamarosan felvesszük Önnel a kapcsolatot.';
