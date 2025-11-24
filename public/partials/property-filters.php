@@ -95,11 +95,11 @@
         <!-- Medence és Tengerre néző -->
         <div class="form-group" style="display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1.8rem;">
             <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <input type="checkbox" name="has_pool" id="filter-has-pool">
+                <input type="checkbox" name="has_pool" id="filter-has-pool" value="1">
                 Medence
             </label>
             <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <input type="checkbox" name="has_sea_view" id="filter-has-sea-view">
+                <input type="checkbox" name="has_sea_view" id="filter-has-sea-view" value="1">
                 Tengerre néző
             </label>
         </div>
