@@ -120,7 +120,7 @@ include __DIR__ . '/partials/header.php';
         </p>
 
         <!-- Search Form -->
-        <form action="properties.php" method="GET" class="search-form">
+        <form action="/properties" method="GET" class="search-form">
             <div class="form-group">
                 <label for="location"><?= htmlspecialchars(get_content('home.hero_search_location_label', 'Helyszín')) ?></label>
                 <select name="location" id="location" class="form-control">
@@ -314,7 +314,7 @@ include __DIR__ . '/partials/header.php';
         <?php else: ?>
             <div class="properties-grid">
                 <?php foreach ($featuredProperties as $property): ?>
-                    <a href="property.php?id=<?= (int)$property['id'] ?>" class="property-card" data-property-id="<?= (int)$property['id'] ?>" style="display: block; text-decoration: none;">
+                    <a href="/property?id=<?= (int)$property['id'] ?>" class="property-card" data-property-id="<?= (int)$property['id'] ?>" style="display: block; text-decoration: none;">
                         <div class="property-card-image">
                             <?php
                             $imageSrc = $property['main_image'] ?? '/assets/images/properties/default.jpg';
@@ -365,7 +365,7 @@ include __DIR__ . '/partials/header.php';
             </div>
 
             <div class="text-center mt-5">
-                <a href="properties.php" class="btn btn-secondary btn-lg">
+                <a href="/properties" class="btn btn-secondary btn-lg">
                     <?= htmlspecialchars(get_content('home.featured_load_more', 'Összes ingatlan megtekintése')) ?> <i class="fas fa-arrow-right"></i>
                 </a>
             </div>

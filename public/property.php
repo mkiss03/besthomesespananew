@@ -8,8 +8,8 @@ $propertyId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 error_log("Property.php loaded with ID: " . $propertyId . " | GET params: " . print_r($_GET, true));
 
 if (!$propertyId) {
-    error_log("No property ID provided, redirecting to properties.php");
-    redirect('properties.php');
+    error_log("No property ID provided, redirecting to /properties");
+    redirect('/properties');
 }
 
 // Fetch property details
@@ -32,8 +32,8 @@ try {
     $property = $stmt->fetch();
 
     if (!$property) {
-        error_log("Property not found for ID: " . $propertyId . ", redirecting to properties.php");
-        redirect('properties.php');
+        error_log("Property not found for ID: " . $propertyId . ", redirecting to /properties");
+        redirect('/properties');
     }
 
     error_log("Property found: " . $property['title'] . " (ID: " . $propertyId . ")");
@@ -54,7 +54,7 @@ try {
 
 } catch (PDOException $e) {
     error_log('Database error: ' . $e->getMessage());
-    redirect('properties.php');
+    redirect('/properties');
 }
 
 // Handle inquiry form submission

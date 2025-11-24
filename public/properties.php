@@ -124,7 +124,7 @@ include __DIR__ . '/partials/header.php';
     <div class="container">
         <!-- Filters -->
         <div class="filters">
-            <form method="GET" action="properties.php">
+            <form method="GET" action="/properties">
                 <div class="filters-grid">
                     <div class="form-group">
                         <label for="property_id">Azonosító</label>
@@ -205,7 +205,7 @@ include __DIR__ . '/partials/header.php';
 
                     <?php if ($location || $type || $priceMin || $priceMax || $bedrooms || $propertyId || $areaMin || $hasPool || $hasSeaView): ?>
                         <div class="form-group" style="align-self: flex-end;">
-                            <a href="properties.php" class="btn btn-outline btn-block">
+                            <a href="/properties" class="btn btn-outline btn-block">
                                 <i class="fas fa-times"></i> Szűrők törlése
                             </a>
                         </div>
@@ -227,14 +227,14 @@ include __DIR__ . '/partials/header.php';
                 <i class="fas fa-search"></i>
                 <h2>Nem találtunk ingatlant a megadott feltételekkel</h2>
                 <p>Próbálja meg módosítani a keresési feltételeket.</p>
-                <a href="properties.php" class="btn btn-primary mt-3">
+                <a href="/properties" class="btn btn-primary mt-3">
                     Összes ingatlan megtekintése
                 </a>
             </div>
         <?php else: ?>
             <div class="properties-grid">
                 <?php foreach ($properties as $property): ?>
-                    <a href="property.php?id=<?= (int)$property['id'] ?>" class="property-card" data-property-id="<?= (int)$property['id'] ?>" style="display: block; text-decoration: none;">
+                    <a href="/property?id=<?= (int)$property['id'] ?>" class="property-card" data-property-id="<?= (int)$property['id'] ?>" style="display: block; text-decoration: none;">
                         <div class="property-card-image">
                             <?php
                             $imageSrc = $property['main_image'] ?? '/assets/images/properties/default.jpg';

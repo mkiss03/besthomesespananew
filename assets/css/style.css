@@ -136,6 +136,8 @@ a:hover {
 .navbar.scrolled {
     background: var(--white);
     box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
 }
 
 .navbar .container {
