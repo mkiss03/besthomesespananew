@@ -8,7 +8,76 @@ startSession();
 $pageTitle = 'Főoldal';
 $pageDescription = get_content('home.hero_subtitle', 'Prémium spanyol ingatlanok magyar ügyfeleknek. Villák, apartmanok, penthouse-ok a Costa Blanca és Costa del Sol régióban.');
 
-// Get featured properties
+// Get filter parameters from GET
+$filterLocation = $_GET['location'] ?? '';
+$filterType = $_GET['type'] ?? '';
+$filterPriceMin = $_GET['price_min'] ?? '';
+$filterPriceMax = $_GET['price_max'] ?? '';
+$filterBedroomsMin = $_GET['bedrooms'] ?? '';
+$filterPropertyId = $_GET['property_id'] ?? '';
+$filterAreaMin = $_GET['area_min'] ?? '';
+$filterHasPool = isset($_GET['has_pool']) ? 1 : 0;
+$filterHasSeaView = isset($_GET['has_sea_view']) ? 1 : 0;
+
+// Build WHERE clause for properties
+$where = ['p.is_active = 1'];
+$params = [];
+$hasFilters = false;
+
+// If there are ANY filters, show all active properties, not just featured
+if ($filterLocation || $filterType || $filterPriceMin || $filterPriceMax || $filterBedroomsMin || $filterPropertyId || $filterAreaMin || $filterHasPool || $filterHasSeaView) {
+    $hasFilters = true;
+} else {
+    // No filters = show only featured
+    $where[] = 'p.is_featured = 1';
+}
+
+if ($filterPropertyId) {
+    $where[] = 'p.id = ?';
+    $params[] = $filterPropertyId;
+}
+
+if ($filterLocation) {
+    $where[] = 'l.city = ?';
+    $params[] = $filterLocation;
+}
+
+if ($filterType) {
+    $where[] = 'p.property_type_id = ?';
+    $params[] = $filterType;
+}
+
+if ($filterPriceMin) {
+    $where[] = 'p.price >= ?';
+    $params[] = $filterPriceMin;
+}
+
+if ($filterPriceMax) {
+    $where[] = 'p.price <= ?';
+    $params[] = $filterPriceMax;
+}
+
+if ($filterAreaMin) {
+    $where[] = 'p.area_sqm >= ?';
+    $params[] = $filterAreaMin;
+}
+
+if ($filterBedroomsMin) {
+    $where[] = 'p.bedrooms >= ?';
+    $params[] = $filterBedroomsMin;
+}
+
+if ($filterHasPool) {
+    $where[] = 'p.has_pool = 1';
+}
+
+if ($filterHasSeaView) {
+    $where[] = 'p.has_sea_view = 1';
+}
+
+$whereClause = implode(' AND ', $where);
+
+// Get properties (featured or filtered)
 try {
     $pdo = getPDO();
 
@@ -21,16 +90,19 @@ try {
         FROM properties p
         LEFT JOIN property_types pt ON p.property_type_id = pt.id
         LEFT JOIN locations l ON p.location_id = l.id
-        WHERE p.is_featured = 1 AND p.is_active = 1
-        ORDER BY p.created_at DESC
-        LIMIT 6
+        WHERE $whereClause
+        ORDER BY p.is_featured DESC, p.created_at DESC
+        LIMIT 12
     ");
-    $stmt->execute();
+    $stmt->execute($params);
     $featuredProperties = $stmt->fetchAll();
+
+    $totalResults = count($featuredProperties);
 
 } catch (PDOException $e) {
     error_log('Database error: ' . $e->getMessage());
     $featuredProperties = [];
+    $totalResults = 0;
 }
 
 include __DIR__ . '/partials/header.php';
@@ -54,10 +126,14 @@ include __DIR__ . '/partials/header.php';
                 <select name="location" id="location" class="form-control">
                     <option value="">Összes helyszín</option>
                     <?php
+                    // Only show these 4 locations
+                    $allowedCities = ['Benidorm', 'Alicante', 'Torrevieja', 'Calpe'];
                     try {
-                        $locationStmt = $pdo->query("SELECT DISTINCT city, region FROM locations ORDER BY city");
+                        $placeholders = implode(',', array_fill(0, count($allowedCities), '?'));
+                        $locationStmt = $pdo->prepare("SELECT DISTINCT city FROM locations WHERE city IN ($placeholders) ORDER BY city");
+                        $locationStmt->execute($allowedCities);
                         while ($loc = $locationStmt->fetch()): ?>
-                            <option value="<?= e($loc['city']) ?>"><?= e($loc['city']) ?> (<?= e($loc['region']) ?>)</option>
+                            <option value="<?= e($loc['city']) ?>"><?= e($loc['city']) ?></option>
                         <?php endwhile;
                     } catch (PDOException $e) {
                         error_log($e->getMessage());
@@ -84,14 +160,26 @@ include __DIR__ . '/partials/header.php';
             </div>
 
             <div class="form-group">
-                <label for="price_max"><?= htmlspecialchars(get_content('home.hero_search_price_label', 'Maximum ár')) ?> (€)</label>
-                <select name="price_max" id="price_max" class="form-control">
-                    <option value="">Bármennyi</option>
+                <label for="price_min">Minimum ár (€)</label>
+                <select name="price_min" id="price_min" class="form-control">
+                    <option value="">Nincs minimum</option>
+                    <option value="100000">100,000 €</option>
                     <option value="200000">200,000 €</option>
+                    <option value="300000">300,000 €</option>
                     <option value="400000">400,000 €</option>
-                    <option value="600000">600,000 €</option>
-                    <option value="800000">800,000 €</option>
+                    <option value="500000">500,000 €</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="price_max">Maximum ár (€)</label>
+                <select name="price_max" id="price_max" class="form-control">
+                    <option value="">Nincs maximum</option>
+                    <option value="300000">300,000 €</option>
+                    <option value="500000">500,000 €</option>
+                    <option value="700000">700,000 €</option>
                     <option value="1000000">1,000,000 €</option>
+                    <option value="1500000">1,500,000 €</option>
                 </select>
             </div>
 
@@ -116,7 +204,7 @@ include __DIR__ . '/partials/header.php';
 </section>
 
 <!-- Featured Properties Section -->
-<section class="section">
+<section class="section" id="featured">
     <div class="container">
         <div class="section-header text-center">
             <h2><?= htmlspecialchars(get_content('home.featured_title', 'Kiemelt Ingatlanok')) ?></h2>
@@ -125,33 +213,101 @@ include __DIR__ . '/partials/header.php';
             </p>
         </div>
 
-        <!-- Detailed Filter Row (Static for now, functionality to be added later) -->
-        <div class="filter-bar">
-            <div class="filter-group">
-                <label><?= htmlspecialchars(get_content('home.featured_filter_id', 'Azonosító')) ?></label>
-                <input type="text" class="filter-input" placeholder="ID...">
+        <!-- Results count for filtered searches -->
+        <?php if ($hasFilters): ?>
+            <div class="results-info" style="text-align: center; margin-bottom: 1.5rem; font-size: 1.125rem; color: var(--text-medium);">
+                <strong><?= $totalResults ?></strong> találat
             </div>
+        <?php endif; ?>
+
+        <!-- Detailed Filter Row -->
+        <form method="GET" action="/index.php#featured" class="filter-bar">
             <div class="filter-group">
-                <label><?= htmlspecialchars(get_content('home.featured_filter_area', 'Alapterület')) ?></label>
-                <input type="text" class="filter-input" placeholder="m²...">
+                <label for="property_id"><?= htmlspecialchars(get_content('home.featured_filter_id', 'Azonosító')) ?></label>
+                <input type="text" id="property_id" name="property_id" class="filter-input" placeholder="ID..." value="<?= e($filterPropertyId) ?>">
             </div>
+
             <div class="filter-group">
-                <label><?= htmlspecialchars(get_content('home.featured_filter_rooms', 'Szobaszám')) ?></label>
-                <input type="number" class="filter-input" placeholder="0">
+                <label for="filter_location">Helyszín</label>
+                <select id="filter_location" name="location" class="filter-input">
+                    <option value="">Összes</option>
+                    <?php
+                    $allowedCities = ['Benidorm', 'Alicante', 'Torrevieja', 'Calpe'];
+                    foreach ($allowedCities as $city):
+                        $selected = ($city === $filterLocation) ? 'selected' : '';
+                    ?>
+                        <option value="<?= e($city) ?>" <?= $selected ?>><?= e($city) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
+
+            <div class="filter-group">
+                <label for="filter_type">Típus</label>
+                <select id="filter_type" name="type" class="filter-input">
+                    <option value="">Összes</option>
+                    <?php
+                    try {
+                        $typeStmt = $pdo->query("SELECT id, name_hu FROM property_types ORDER BY name_hu");
+                        while ($type = $typeStmt->fetch()):
+                            $selected = ($type['id'] == $filterType) ? 'selected' : '';
+                        ?>
+                            <option value="<?= e($type['id']) ?>" <?= $selected ?>><?= e($type['name_hu']) ?></option>
+                        <?php endwhile;
+                    } catch (PDOException $e) {
+                        error_log($e->getMessage());
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filter_price_min">Min. ár (€)</label>
+                <input type="number" id="filter_price_min" name="price_min" class="filter-input" placeholder="0" value="<?= e($filterPriceMin) ?>">
+            </div>
+
+            <div class="filter-group">
+                <label for="filter_price_max">Max. ár (€)</label>
+                <input type="number" id="filter_price_max" name="price_max" class="filter-input" placeholder="0" value="<?= e($filterPriceMax) ?>">
+            </div>
+
+            <div class="filter-group">
+                <label for="area_min"><?= htmlspecialchars(get_content('home.featured_filter_area', 'Min. alapterület (m²)')) ?></label>
+                <input type="number" id="area_min" name="area_min" class="filter-input" placeholder="0" value="<?= e($filterAreaMin) ?>">
+            </div>
+
+            <div class="filter-group">
+                <label for="filter_bedrooms"><?= htmlspecialchars(get_content('home.featured_filter_rooms', 'Min. szobaszám')) ?></label>
+                <input type="number" id="filter_bedrooms" name="bedrooms" class="filter-input" placeholder="0" value="<?= e($filterBedroomsMin) ?>">
+            </div>
+
             <div class="filter-group">
                 <label>
-                    <input type="checkbox" class="filter-checkbox">
+                    <input type="checkbox" name="has_pool" class="filter-checkbox" <?= $filterHasPool ? 'checked' : '' ?>>
                     <?= htmlspecialchars(get_content('home.featured_filter_pool', 'Medence')) ?>
                 </label>
             </div>
+
             <div class="filter-group">
                 <label>
-                    <input type="checkbox" class="filter-checkbox">
+                    <input type="checkbox" name="has_sea_view" class="filter-checkbox" <?= $filterHasSeaView ? 'checked' : '' ?>>
                     <?= htmlspecialchars(get_content('home.featured_filter_seaview', 'Tengerre néző')) ?>
                 </label>
             </div>
-        </div>
+
+            <div class="filter-group">
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
+                    <i class="fas fa-search"></i> Szűrés
+                </button>
+            </div>
+
+            <?php if ($hasFilters): ?>
+                <div class="filter-group">
+                    <a href="/index.php#featured" class="btn btn-outline" style="width: 100%; margin-top: 1.5rem; display: inline-block; text-align: center;">
+                        <i class="fas fa-times"></i> Törlés
+                    </a>
+                </div>
+            <?php endif; ?>
+        </form>
 
         <?php if (empty($featuredProperties)): ?>
             <p class="text-center">Jelenleg nincsenek kiemelt ingatlanok.</p>

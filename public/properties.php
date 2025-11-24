@@ -8,8 +8,13 @@ $pageDescription = 'Böngésszen prémium spanyol ingatlanjaink között. Villá
 // Get filter parameters
 $location = $_GET['location'] ?? '';
 $type = $_GET['type'] ?? '';
+$priceMin = $_GET['price_min'] ?? '';
 $priceMax = $_GET['price_max'] ?? '';
 $bedrooms = $_GET['bedrooms'] ?? '';
+$propertyId = $_GET['property_id'] ?? '';
+$areaMin = $_GET['area_min'] ?? '';
+$hasPool = isset($_GET['has_pool']) ? 1 : 0;
+$hasSeaView = isset($_GET['has_sea_view']) ? 1 : 0;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage = 12;
 $offset = ($page - 1) * $perPage;
@@ -17,6 +22,11 @@ $offset = ($page - 1) * $perPage;
 // Build WHERE clause
 $where = ['p.is_active = 1'];
 $params = [];
+
+if ($propertyId) {
+    $where[] = 'p.id = ?';
+    $params[] = $propertyId;
+}
 
 if ($location) {
     $where[] = 'l.city = ?';
@@ -28,14 +38,32 @@ if ($type) {
     $params[] = $type;
 }
 
+if ($priceMin) {
+    $where[] = 'p.price >= ?';
+    $params[] = $priceMin;
+}
+
 if ($priceMax) {
     $where[] = 'p.price <= ?';
     $params[] = $priceMax;
 }
 
+if ($areaMin) {
+    $where[] = 'p.area_sqm >= ?';
+    $params[] = $areaMin;
+}
+
 if ($bedrooms) {
     $where[] = 'p.bedrooms >= ?';
     $params[] = $bedrooms;
+}
+
+if ($hasPool) {
+    $where[] = 'p.has_pool = 1';
+}
+
+if ($hasSeaView) {
+    $where[] = 'p.has_sea_view = 1';
 }
 
 $whereClause = implode(' AND ', $where);
@@ -194,23 +222,21 @@ include __DIR__ . '/partials/header.php';
             <form method="GET" action="/properties.php">
                 <div class="filters-grid">
                     <div class="form-group">
+                        <label for="property_id">Azonosító</label>
+                        <input type="text" name="property_id" id="property_id" class="form-control" placeholder="Ingatlan ID..." value="<?= e($propertyId) ?>">
+                    </div>
+
+                    <div class="form-group">
                         <label for="location">Helyszín</label>
                         <select name="location" id="location" class="form-control">
                             <option value="">Összes helyszín</option>
                             <?php
-                            try {
-                                $locationStmt = $pdo->query("SELECT DISTINCT city, region FROM locations ORDER BY city");
-                                while ($loc = $locationStmt->fetch()):
-                                    $selected = ($loc['city'] === $location) ? 'selected' : '';
-                                ?>
-                                    <option value="<?= e($loc['city']) ?>" <?= $selected ?>>
-                                        <?= e($loc['city']) ?> (<?= e($loc['region']) ?>)
-                                    </option>
-                                <?php endwhile;
-                            } catch (PDOException $e) {
-                                error_log($e->getMessage());
-                            }
+                            $allowedCities = ['Benidorm', 'Alicante', 'Torrevieja', 'Calpe'];
+                            foreach ($allowedCities as $city):
+                                $selected = ($city === $location) ? 'selected' : '';
                             ?>
+                                <option value="<?= e($city) ?>" <?= $selected ?>><?= e($city) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
 
@@ -236,31 +262,34 @@ include __DIR__ . '/partials/header.php';
                     </div>
 
                     <div class="form-group">
-                        <label for="price_max">Max. ár (€)</label>
-                        <select name="price_max" id="price_max" class="form-control">
-                            <option value="">Bármennyi</option>
-                            <?php
-                            $priceOptions = [200000, 400000, 600000, 800000, 1000000];
-                            foreach ($priceOptions as $price):
-                                $selected = ($price == $priceMax) ? 'selected' : '';
-                            ?>
-                                <option value="<?= $price ?>" <?= $selected ?>>
-                                    <?= number_format($price, 0, ',', ' ') ?> €
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <label for="price_min">Min. ár (€)</label>
+                        <input type="number" name="price_min" id="price_min" class="form-control" placeholder="0" value="<?= e($priceMin) ?>">
                     </div>
 
                     <div class="form-group">
-                        <label for="bedrooms">Hálószobák</label>
-                        <select name="bedrooms" id="bedrooms" class="form-control">
-                            <option value="">Bármennyi</option>
-                            <?php for ($i = 1; $i <= 4; $i++):
-                                $selected = ($i == $bedrooms) ? 'selected' : '';
-                            ?>
-                                <option value="<?= $i ?>" <?= $selected ?>><?= $i ?>+</option>
-                            <?php endfor; ?>
-                        </select>
+                        <label for="price_max">Max. ár (€)</label>
+                        <input type="number" name="price_max" id="price_max" class="form-control" placeholder="0" value="<?= e($priceMax) ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="area_min">Min. alapterület (m²)</label>
+                        <input type="number" name="area_min" id="area_min" class="form-control" placeholder="0" value="<?= e($areaMin) ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bedrooms">Min. hálószobák</label>
+                        <input type="number" name="bedrooms" id="bedrooms" class="form-control" placeholder="0" value="<?= e($bedrooms) ?>">
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: center; gap: 1rem; padding-top: 1.8rem;">
+                        <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="has_pool" <?= $hasPool ? 'checked' : '' ?>>
+                            Medence
+                        </label>
+                        <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="has_sea_view" <?= $hasSeaView ? 'checked' : '' ?>>
+                            Tengerre néző
+                        </label>
                     </div>
 
                     <div class="form-group" style="align-self: flex-end;">
@@ -269,7 +298,7 @@ include __DIR__ . '/partials/header.php';
                         </button>
                     </div>
 
-                    <?php if ($location || $type || $priceMax || $bedrooms): ?>
+                    <?php if ($location || $type || $priceMin || $priceMax || $bedrooms || $propertyId || $areaMin || $hasPool || $hasSeaView): ?>
                         <div class="form-group" style="align-self: flex-end;">
                             <a href="/properties.php" class="btn btn-outline btn-block">
                                 <i class="fas fa-times"></i> Szűrők törlése
