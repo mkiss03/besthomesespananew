@@ -31,14 +31,13 @@ echo "<div style='background:#e6ffe6;padding:20px;border-left:4px solid #27ae60;
 echo "<h3 style='color:#27ae60;margin-top:0;'>✅ Property ID rendben!</h3>";
 echo "<p>Folytatás az ingatlan adatainak betöltésével...</p>";
 echo "</div>";
-echo "</div></body></html>";
 
-// Comment out the rest temporarily to see if we get this far
-exit;
+echo "<h2>3. Adatbázis Lekérdezés:</h2>";
 
 // Fetch property details
 try {
     $pdo = getPDO();
+    echo "<p style='color:green;'>✅ Adatbázis kapcsolat OK</p>";
 
     $stmt = $pdo->prepare("
         SELECT
@@ -55,11 +54,41 @@ try {
     $stmt->execute([$propertyId]);
     $property = $stmt->fetch();
 
+    echo "<p><strong>SQL lekérdezés lefutott</strong></p>";
+
     if (!$property) {
-        error_log("Property not found for ID: " . $propertyId . ", redirecting to /properties");
-        die("DEBUG: Property not found for ID: " . $propertyId);
-        redirect('/properties');
+        echo "<div style='background:#ffe6e6;padding:20px;border-left:4px solid #e74c3c;margin:20px 0;'>";
+        echo "<h3 style='color:#e74c3c;margin-top:0;'>❌ HIBA: Az ingatlan nem található!</h3>";
+        echo "<p><strong>Property ID:</strong> $propertyId</p>";
+        echo "<p><strong>Lehetséges okok:</strong></p>";
+        echo "<ul>";
+        echo "<li>Az ingatlan nem létezik az adatbázisban</li>";
+        echo "<li>Az ingatlan nincs aktív állapotban (is_active = 0)</li>";
+        echo "</ul>";
+
+        // Check if property exists at all (ignoring is_active)
+        $checkStmt = $pdo->prepare("SELECT id, is_active FROM properties WHERE id = ?");
+        $checkStmt->execute([$propertyId]);
+        $check = $checkStmt->fetch();
+
+        if ($check) {
+            echo "<p><strong>Extra info:</strong> Az ingatlan létezik az adatbázisban (ID: {$check['id']}), de is_active = {$check['is_active']}</p>";
+        } else {
+            echo "<p><strong>Extra info:</strong> Az ingatlan egyáltalán nem létezik az adatbázisban ezzel az ID-vel</p>";
+        }
+
+        echo "</div>";
+        echo "<p><a href='/' style='background:#3498db;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;'>← Vissza a főoldalra</a></p>";
+        echo "</div></body></html>";
+        exit;
     }
+
+    echo "<div style='background:#e6ffe6;padding:20px;border-left:4px solid #27ae60;margin:20px 0;'>";
+    echo "<h3 style='color:#27ae60;margin-top:0;'>✅ Ingatlan megtalálva!</h3>";
+    echo "<p><strong>Cím:</strong> " . htmlspecialchars($property['title']) . "</p>";
+    echo "<p><strong>Helyszín:</strong> " . htmlspecialchars($property['city'] ?? 'N/A') . "</p>";
+    echo "<p><strong>Ár:</strong> " . number_format($property['price'], 0, ',', ' ') . " " . $property['currency'] . "</p>";
+    echo "</div>";
 
     error_log("Property found: " . $property['title'] . " (ID: " . $propertyId . ")");
 
@@ -77,10 +106,30 @@ try {
     $pageTitle = $property['meta_title'] ?? $property['title'];
     $pageDescription = $property['meta_description'] ?? strip_tags(substr($property['description'], 0, 160));
 
+    // DEBUG: If we got here, everything works!
+    echo "<h2>4. ✅ TESZT SIKERES!</h2>";
+    echo "<div style='background:#d4edda;padding:20px;border-left:4px solid #28a745;margin:20px 0;'>";
+    echo "<h3 style='color:#155724;margin-top:0;'>🎉 Minden rendben!</h3>";
+    echo "<p><strong>Az ingatlan oldal betöltése sikeres lenne!</strong></p>";
+    echo "<p>Az összes adat megvan:</p>";
+    echo "<ul>";
+    echo "<li>✅ Property ID: $propertyId</li>";
+    echo "<li>✅ Ingatlan adatok: Megtalálva</li>";
+    echo "<li>✅ Képek száma: " . count($propertyImages) . "</li>";
+    echo "<li>✅ Meta adatok: Rendben</li>";
+    echo "</ul>";
+    echo "<p style='margin-top:20px;'><strong>Most már eltávolíthatjuk a debug kódot és betölthetjük a valódi ingatlan oldalt!</strong></p>";
+    echo "</div>";
+    echo "</div></body></html>";
+    exit;
+
 } catch (PDOException $e) {
-    error_log('Database error: ' . $e->getMessage());
-    die("DEBUG: Database error: " . $e->getMessage());
-    redirect('/properties');
+    echo "<div style='background:#ffe6e6;padding:20px;border-left:4px solid #e74c3c;margin:20px 0;'>";
+    echo "<h3 style='color:#e74c3c;margin-top:0;'>❌ Adatbázis HIBA!</h3>";
+    echo "<p><strong>Hibaüzenet:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+    echo "</div>";
+    echo "</div></body></html>";
+    exit;
 }
 
 // Handle inquiry form submission
