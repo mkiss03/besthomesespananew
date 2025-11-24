@@ -7,8 +7,10 @@ $propertyId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 // DEBUG: Log the property ID
 error_log("Property.php loaded with ID: " . $propertyId . " | GET params: " . print_r($_GET, true));
 
+// TEMPORARY DEBUG: Show what's happening
 if (!$propertyId) {
     error_log("No property ID provided, redirecting to /properties");
+    die("DEBUG: No property ID provided. GET params: " . print_r($_GET, true));
     redirect('/properties');
 }
 
@@ -33,6 +35,7 @@ try {
 
     if (!$property) {
         error_log("Property not found for ID: " . $propertyId . ", redirecting to /properties");
+        die("DEBUG: Property not found for ID: " . $propertyId);
         redirect('/properties');
     }
 
@@ -54,6 +57,7 @@ try {
 
 } catch (PDOException $e) {
     error_log('Database error: ' . $e->getMessage());
+    die("DEBUG: Database error: " . $e->getMessage());
     redirect('/properties');
 }
 
