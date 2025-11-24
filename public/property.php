@@ -5,7 +5,7 @@ require_once __DIR__ . '/../config/config.php';
 $propertyId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if (!$propertyId) {
-    redirect('/properties.php');
+    redirect('properties.php');
 }
 
 // Fetch property details
@@ -28,7 +28,7 @@ try {
     $property = $stmt->fetch();
 
     if (!$property) {
-        redirect('/properties.php');
+        redirect('properties.php');
     }
 
     // Fetch property images
@@ -47,7 +47,7 @@ try {
 
 } catch (PDOException $e) {
     error_log('Database error: ' . $e->getMessage());
-    redirect('/properties.php');
+    redirect('properties.php');
 }
 
 // Handle inquiry form submission
