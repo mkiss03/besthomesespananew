@@ -92,15 +92,23 @@ try {
 
     error_log("Property found: " . $property['title'] . " (ID: " . $propertyId . ")");
 
-    // Fetch property images
-    $stmt = $pdo->prepare("
-        SELECT id, filename, is_primary, sort_order
-        FROM property_images
-        WHERE property_id = ?
-        ORDER BY is_primary DESC, sort_order ASC
-    ");
-    $stmt->execute([$propertyId]);
-    $propertyImages = $stmt->fetchAll();
+    // Fetch property images (optional - if table doesn't exist, skip)
+    $propertyImages = [];
+    try {
+        $stmt = $pdo->prepare("
+            SELECT id, filename, is_primary, sort_order
+            FROM property_images
+            WHERE property_id = ?
+            ORDER BY is_primary DESC, sort_order ASC
+        ");
+        $stmt->execute([$propertyId]);
+        $propertyImages = $stmt->fetchAll();
+        echo "<p style='color:green;'>✅ Képek betöltve: " . count($propertyImages) . " db</p>";
+    } catch (PDOException $e) {
+        // Table doesn't exist or other error - continue without images
+        echo "<p style='color:orange;'>⚠️ property_images tábla nem létezik - folytatás main_image-dzsel</p>";
+        error_log("Property images query failed (table may not exist): " . $e->getMessage());
+    }
 
     // Page meta data
     $pageTitle = $property['meta_title'] ?? $property['title'];
