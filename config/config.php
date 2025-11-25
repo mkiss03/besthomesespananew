@@ -140,7 +140,7 @@ function isAdmin(): bool {
  */
 function requireAdmin(): void {
     if (!isAdmin()) {
-        redirect('/admin/login.php');
+        redirect('/admin-uk0i3/login.php');
     }
 }
 
