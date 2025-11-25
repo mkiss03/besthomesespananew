@@ -315,7 +315,7 @@ include __DIR__ . '/partials/header.php';
         <div class="agent-section">
             <!-- Agent Photo -->
             <div class="agent-photo">
-                <img src="<?= e(get_content('home.agent_image', '/eszter-main.jpg')) ?>" alt="<?= e(get_content('home.agent_title', 'Balogh Eszter')) ?>">
+                <img src="/eszter-main.jpg" alt="<?= e(get_content('home.agent_title', 'Balogh Eszter')) ?>">
             </div>
 
             <!-- Agent Content -->
