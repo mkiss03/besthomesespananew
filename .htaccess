@@ -30,8 +30,6 @@ DirectoryIndex index.php index.html
     php_value max_input_time 300
 </IfModule>
 
-# Admin panel security - block only /admin path (not admin-*)
-RewriteCond %{REQUEST_URI} ^/admin/?$
-RewriteRule .* - [F,L]
-RewriteCond %{REQUEST_URI} ^/admin/
+# Admin panel security - block /admin but NOT /admin-uk0i3
+RewriteCond %{REQUEST_URI} ^/admin(/.*)?$
 RewriteRule .* - [F,L]
