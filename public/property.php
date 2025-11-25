@@ -168,7 +168,7 @@ include __DIR__ . '/partials/header.php';
                 <div class="property-description">
                     <h2>Leírás</h2>
                     <div class="description-text">
-                        <?= nl2br(e($property['description'] ?? 'Nincs leírás.')) ?>
+                        <?= $property['description'] ?? '<p>Nincs leírás.</p>' ?>
                     </div>
                 </div>
 
@@ -176,7 +176,7 @@ include __DIR__ . '/partials/header.php';
                 <div class="property-features">
                     <h2>Jellemzők</h2>
                     <div class="features-grid">
-                        <?php if ($property['area']): ?>
+                        <?php if (!empty($property['area'])): ?>
                             <div class="feature-item">
                                 <i class="fas fa-ruler-combined"></i>
                                 <span class="feature-label">Terület</span>
@@ -184,7 +184,7 @@ include __DIR__ . '/partials/header.php';
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($property['bedrooms']): ?>
+                        <?php if (!empty($property['bedrooms'])): ?>
                             <div class="feature-item">
                                 <i class="fas fa-bed"></i>
                                 <span class="feature-label">Hálószobák</span>
@@ -192,7 +192,7 @@ include __DIR__ . '/partials/header.php';
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($property['bathrooms']): ?>
+                        <?php if (!empty($property['bathrooms'])): ?>
                             <div class="feature-item">
                                 <i class="fas fa-bath"></i>
                                 <span class="feature-label">Fürdőszobák</span>
@@ -200,7 +200,7 @@ include __DIR__ . '/partials/header.php';
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($property['has_pool']): ?>
+                        <?php if (!empty($property['has_pool'])): ?>
                             <div class="feature-item">
                                 <i class="fas fa-swimming-pool"></i>
                                 <span class="feature-label">Medence</span>
@@ -208,7 +208,7 @@ include __DIR__ . '/partials/header.php';
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($property['has_garage']): ?>
+                        <?php if (!empty($property['has_garage'])): ?>
                             <div class="feature-item">
                                 <i class="fas fa-warehouse"></i>
                                 <span class="feature-label">Garázs</span>
@@ -216,7 +216,7 @@ include __DIR__ . '/partials/header.php';
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($property['has_garden']): ?>
+                        <?php if (!empty($property['has_garden'])): ?>
                             <div class="feature-item">
                                 <i class="fas fa-tree"></i>
                                 <span class="feature-label">Kert</span>
@@ -224,7 +224,7 @@ include __DIR__ . '/partials/header.php';
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($property['has_terrace']): ?>
+                        <?php if (!empty($property['has_terrace'])): ?>
                             <div class="feature-item">
                                 <i class="fas fa-umbrella-beach"></i>
                                 <span class="feature-label">Terasz</span>
@@ -232,7 +232,7 @@ include __DIR__ . '/partials/header.php';
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($property['has_sea_view']): ?>
+                        <?php if (!empty($property['has_sea_view'])): ?>
                             <div class="feature-item">
                                 <i class="fas fa-water"></i>
                                 <span class="feature-label">Tengerre néző</span>

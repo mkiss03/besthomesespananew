@@ -19,7 +19,7 @@ define('ADMIN_EMAIL', 'info@besthomesespana.com');
 // Paths
 define('BASE_PATH', dirname(__DIR__));
 define('ASSETS_PATH', '/assets');
-define('UPLOAD_PATH', BASE_PATH . '/public/assets/images/properties');
+define('UPLOAD_PATH', BASE_PATH . '/assets/images/properties');
 
 // Security
 define('SESSION_LIFETIME', 3600 * 2); // 2 hours
