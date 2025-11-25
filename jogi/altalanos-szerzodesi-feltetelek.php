@@ -1,10 +1,10 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 $pageTitle = 'Általános Szerződési Feltételek';
 $pageDescription = 'GDN Homes Espana S.L. (Best Homes Espana) általános szerződési feltételei és szolgáltatási szabályai.';
 
-include __DIR__ . '/../partials/header.php';
+include __DIR__ . '/../public/partials/header.php';
 ?>
 
 <style>
@@ -213,4 +213,4 @@ include __DIR__ . '/../partials/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../partials/footer.php'; ?>
+<?php include __DIR__ . '/../public/partials/footer.php'; ?>

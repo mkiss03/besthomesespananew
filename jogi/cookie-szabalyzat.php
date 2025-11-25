@@ -1,10 +1,10 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 $pageTitle = 'Süti (Cookie) szabályzat';
 $pageDescription = 'GDN Homes Espana S.L. (Best Homes Espana) süti (cookie) használati szabályzata és tájékoztatója.';
 
-include __DIR__ . '/../partials/header.php';
+include __DIR__ . '/../public/partials/header.php';
 ?>
 
 <style>
@@ -290,4 +290,4 @@ include __DIR__ . '/../partials/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../partials/footer.php'; ?>
+<?php include __DIR__ . '/../public/partials/footer.php'; ?>
