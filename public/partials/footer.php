@@ -36,14 +36,14 @@
                 </ul>
             </div>
 
-            <!-- Services -->
+            <!-- Legal Info - FOOTER CHANGE: Replaced Services with Legal Info links -->
             <div class="footer-section">
-                <h3>Szolgáltatásaink</h3>
+                <h3>Jogi információk</h3>
                 <ul class="footer-links">
-                    <li><a href="#">Ingatlan keresés</a></li>
-                    <li><a href="#">Jogi tanácsadás</a></li>
-                    <li><a href="#">Finanszírozási segítség</a></li>
-                    <li><a href="#">Utólagos ügyintézés</a></li>
+                    <li><a href="/jogi/altalanos-szerzodesi-feltetelek.php">Általános Szerződési Feltételek</a></li>
+                    <li><a href="/jogi/adatkezelesi-tajekoztato.php">Adatkezelési tájékoztató</a></li>
+                    <li><a href="/jogi/impresszum.php">Impresszum</a></li>
+                    <li><a href="/jogi/cookie-szabalyzat.php">Süti (Cookie) szabályzat</a></li>
                 </ul>
             </div>
 
