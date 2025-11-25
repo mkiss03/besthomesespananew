@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['content_key'], $_POST
     if (update_content($key, $value)) {
         $successMessage = 'A tartalom sikeresen frissítve: ' . htmlspecialchars($key);
         // Redirect to prevent form resubmission
-        header('Location: /admin/content.php?success=' . urlencode($key));
+        header('Location: /admin-uk0i3/content.php?success=' . urlencode($key));
         exit;
     } else {
         $errorMessage = 'Hiba történt a mentés során.';

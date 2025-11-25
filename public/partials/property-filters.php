@@ -26,10 +26,16 @@
             <select name="location" id="filter-location" class="form-control">
                 <option value="">Összes helyszín</option>
                 <?php
-                $allowedCities = ['Benidorm', 'Alicante', 'Torrevieja', 'Calpe'];
-                foreach ($allowedCities as $city): ?>
-                    <option value="<?= e($city) ?>"><?= e($city) ?></option>
-                <?php endforeach; ?>
+                try {
+                    $pdo = getPDO();
+                    $locationStmt = $pdo->query("SELECT DISTINCT city FROM locations ORDER BY city");
+                    while ($loc = $locationStmt->fetch()): ?>
+                        <option value="<?= e($loc['city']) ?>"><?= e($loc['city']) ?></option>
+                    <?php endwhile;
+                } catch (PDOException $e) {
+                    error_log($e->getMessage());
+                }
+                ?>
             </select>
         </div>
 
