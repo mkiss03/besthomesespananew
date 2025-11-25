@@ -126,7 +126,7 @@ include __DIR__ . '/partials/header.php';
     <div class="data-table">
         <div class="table-header">
             <h2>Legutóbbi ingatlanok</h2>
-            <a href="/admin/properties.php" class="btn btn-secondary btn-sm">
+            <a href="/admin-uk0i3/properties.php" class="btn btn-secondary btn-sm">
                 <i class="fas fa-eye"></i> Összes
             </a>
         </div>
@@ -214,7 +214,7 @@ include __DIR__ . '/partials/header.php';
 <div class="data-table">
     <div class="table-header">
         <h2>Legutóbbi érdeklődések</h2>
-        <a href="/admin/inquiries.php" class="btn btn-secondary btn-sm">
+        <a href="/admin-uk0i3/inquiries.php" class="btn btn-secondary btn-sm">
             <i class="fas fa-eye"></i> Összes
         </a>
     </div>

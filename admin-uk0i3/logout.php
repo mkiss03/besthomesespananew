@@ -8,4 +8,4 @@ $_SESSION = [];
 session_destroy();
 
 // Redirect to login
-redirect('/admin/login.php');
+redirect('/admin-uk0i3/login.php');

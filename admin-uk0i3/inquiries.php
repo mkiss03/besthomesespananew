@@ -298,7 +298,7 @@ include __DIR__ . '/partials/header.php';
                                 </td>
                                 <td>
                                     <?php if ($inq['property_title']): ?>
-                                        <a href="/admin/property-edit.php?id=<?= $inq['property_id'] ?>" target="_blank">
+                                        <a href="/admin-uk0i3/property-edit.php?id=<?= $inq['property_id'] ?>" target="_blank">
                                             <?= e($inq['property_title']) ?>
                                         </a>
                                     <?php else: ?>
@@ -437,7 +437,7 @@ function switchTab(tabId) {
 
 // Update property inquiry status
 function updateInquiryStatus(id, status) {
-    fetch('/admin/api/inquiries.php?id=' + id, {
+    fetch('/admin-uk0i3/api/inquiries.php?id=' + id, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

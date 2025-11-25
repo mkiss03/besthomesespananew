@@ -44,7 +44,7 @@ try {
         $property = $stmt->fetch();
 
         if (!$property) {
-            redirect('/admin/properties.php');
+            redirect('/admin-uk0i3/properties.php');
         }
 
         $formData = array_merge($formData, $property);
@@ -145,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_property'])) {
                 ]);
                 $newId = $pdo->lastInsertId();
                 $success = 'Ingatlan sikeresen létrehozva!';
-                redirect('/admin/property-edit.php?id=' . $newId . '&success=1');
+                redirect('/admin-uk0i3/property-edit.php?id=' . $newId . '&success=1');
             }
 
             // Reload form data
@@ -681,7 +681,7 @@ include __DIR__ . '/partials/header.php';
                 progressDiv.style.display = 'none';
             });
 
-            xhr.open('POST', '/admin/api/property-image-upload.php');
+            xhr.open('POST', '/admin-uk0i3/api/property-image-upload.php');
             xhr.send(formData);
 
             // Reset file input
@@ -697,7 +697,7 @@ include __DIR__ . '/partials/header.php';
             const formData = new FormData();
             formData.append('image_id', imageId);
 
-            fetch('/admin/api/property-image-delete.php', {
+            fetch('/admin-uk0i3/api/property-image-delete.php', {
                 method: 'POST',
                 body: formData
             })
@@ -762,7 +762,7 @@ include __DIR__ . '/partials/header.php';
             const order = Array.from(items).map(item => item.getAttribute('data-image-id'));
 
             // Send to server
-            fetch('/admin/api/property-image-reorder.php', {
+            fetch('/admin-uk0i3/api/property-image-reorder.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -801,7 +801,7 @@ include __DIR__ . '/partials/header.php';
     <!-- Form Actions -->
     <div class="form-section">
         <div class="form-actions">
-            <a href="/admin/properties.php" class="btn btn-outline">
+            <a href="/admin-uk0i3/properties.php" class="btn btn-outline">
                 <i class="fas fa-times"></i> Mégse
             </a>
             <button type="submit" name="save_property" class="btn btn-primary btn-lg">

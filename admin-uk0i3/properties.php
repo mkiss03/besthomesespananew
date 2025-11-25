@@ -70,7 +70,7 @@ include __DIR__ . '/partials/header.php';
     <div class="table-header">
         <h2>Ingatlanok (<?= number_format($totalProperties, 0, ',', ' ') ?> db)</h2>
         <div style="display: flex; gap: var(--spacing-sm);">
-            <a href="/admin/property-edit.php" class="btn btn-primary btn-sm">
+            <a href="/admin-uk0i3/property-edit.php" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus"></i> Új ingatlan
             </a>
         </div>
@@ -78,7 +78,7 @@ include __DIR__ . '/partials/header.php';
 
     <!-- Search -->
     <div style="padding: var(--spacing-lg); border-bottom: 1px solid #e0e0e0;">
-        <form method="GET" action="/admin/properties.php" style="display: flex; gap: var(--spacing-sm);">
+        <form method="GET" action="/admin-uk0i3/properties.php" style="display: flex; gap: var(--spacing-sm);">
             <input
                 type="text"
                 name="search"
@@ -90,7 +90,7 @@ include __DIR__ . '/partials/header.php';
                 <i class="fas fa-search"></i> Keresés
             </button>
             <?php if ($search): ?>
-                <a href="/admin/properties.php" class="btn btn-outline btn-sm">
+                <a href="/admin-uk0i3/properties.php" class="btn btn-outline btn-sm">
                     <i class="fas fa-times"></i> Törlés
                 </a>
             <?php endif; ?>
@@ -101,7 +101,7 @@ include __DIR__ . '/partials/header.php';
         <div style="padding: var(--spacing-xxl); text-align: center; color: var(--text-medium);">
             <i class="fas fa-building" style="font-size: 3rem; margin-bottom: var(--spacing-md);"></i>
             <p>Nincsenek ingatlanok.</p>
-            <a href="/admin/property-edit.php" class="btn btn-primary" style="margin-top: var(--spacing-md);">
+            <a href="/admin-uk0i3/property-edit.php" class="btn btn-primary" style="margin-top: var(--spacing-md);">
                 <i class="fas fa-plus"></i> Első ingatlan hozzáadása
             </a>
         </div>
@@ -150,7 +150,7 @@ include __DIR__ . '/partials/header.php';
                                    class="btn btn-outline btn-sm" title="Megtekintés">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="/admin/property-edit.php?id=<?= $property['id'] ?>"
+                                <a href="/admin-uk0i3/property-edit.php?id=<?= $property['id'] ?>"
                                    class="btn btn-secondary btn-sm" title="Szerkesztés">
                                     <i class="fas fa-edit"></i>
                                 </a>
@@ -210,7 +210,7 @@ function deleteProperty(id) {
         return;
     }
 
-    fetch('/admin/api/properties.php?id=' + id, {
+    fetch('/admin-uk0i3/api/properties.php?id=' + id, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json'

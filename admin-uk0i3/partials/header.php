@@ -320,22 +320,22 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             </div>
 
             <nav class="sidebar-menu">
-                <a href="/admin/index.php" class="menu-item <?= $currentPage === 'index' ? 'active' : '' ?>">
+                <a href="/admin-uk0i3/index.php" class="menu-item <?= $currentPage === 'index' ? 'active' : '' ?>">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
-                <a href="/admin/properties.php" class="menu-item <?= $currentPage === 'properties' || $currentPage === 'property-edit' ? 'active' : '' ?>">
+                <a href="/admin-uk0i3/properties.php" class="menu-item <?= $currentPage === 'properties' || $currentPage === 'property-edit' ? 'active' : '' ?>">
                     <i class="fas fa-building"></i> Ingatlanok
                 </a>
-                <a href="/admin/inquiries.php" class="menu-item <?= $currentPage === 'inquiries' ? 'active' : '' ?>">
+                <a href="/admin-uk0i3/inquiries.php" class="menu-item <?= $currentPage === 'inquiries' ? 'active' : '' ?>">
                     <i class="fas fa-envelope"></i> Érdeklődések
                 </a>
-                <a href="/admin/content.php" class="menu-item <?= $currentPage === 'content' ? 'active' : '' ?>">
+                <a href="/admin-uk0i3/content.php" class="menu-item <?= $currentPage === 'content' ? 'active' : '' ?>">
                     <i class="fas fa-edit"></i> Tartalom
                 </a>
                 <a href="/" target="_blank" class="menu-item">
                     <i class="fas fa-external-link-alt"></i> Weboldal megtekintése
                 </a>
-                <a href="/admin/logout.php" class="menu-item">
+                <a href="/admin-uk0i3/logout.php" class="menu-item">
                     <i class="fas fa-sign-out-alt"></i> Kijelentkezés
                 </a>
             </nav>

@@ -29,3 +29,7 @@ DirectoryIndex index.php index.html
     php_value max_execution_time 300
     php_value max_input_time 300
 </IfModule>
+
+# Admin panel security - custom URL
+RewriteRule ^admin$ - [F,L]
+RewriteRule ^admin/(.*)$ - [F,L]
